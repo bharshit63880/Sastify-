@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { LoadingState } from "../components/LoadingState";
 import { TrackingTimeline } from "../components/TrackingTimeline";
 import { Button } from "../components/ui/Button";

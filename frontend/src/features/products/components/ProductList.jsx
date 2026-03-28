@@ -190,19 +190,21 @@ export const ProductList = ({
   });
 
   const baseFilterKey = JSON.stringify(baseFilters);
+  const normalizedBaseFilters = useMemo(() => baseFilters, [baseFilterKey]);
+  const normalizedBaseCategory = useMemo(() => normalizedBaseFilters.category || [], [normalizedBaseFilters]);
 
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
-      category: baseFilters.category || prev.category,
+      category: normalizedBaseCategory,
     }));
     setPage(1);
-  }, [baseFilterKey]);
+  }, [normalizedBaseCategory]);
 
   useEffect(() => {
     dispatch(
       fetchProductsAsync({
-        ...baseFilters,
+        ...normalizedBaseFilters,
         category: filters.category,
         brand: filters.brand,
         minPrice: filters.priceRange[0],
@@ -218,7 +220,7 @@ export const ProductList = ({
     return () => {
       dispatch(resetProductFetchStatus());
     };
-  }, [baseFilterKey, dispatch, filters, page, sort]);
+  }, [dispatch, filters, normalizedBaseFilters, page, sort]);
 
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
@@ -262,7 +264,7 @@ export const ProductList = ({
 
   const resetFilters = () =>
     setFilters({
-      category: baseFilters.category || [],
+      category: normalizedBaseCategory,
       brand: [],
       priceRange: [0, 250000],
       rating: 0,

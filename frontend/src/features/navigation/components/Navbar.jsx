@@ -115,7 +115,7 @@ export const Navbar = () => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const recentSearches = useMemo(() => loadRecentSearches(), [location.pathname, searchOpen]);
+  const recentSearches = loadRecentSearches();
 
   const trustHighlights = useMemo(() => {
     const safeNumber = (value) => Number(value || 0).toLocaleString("en-IN");
