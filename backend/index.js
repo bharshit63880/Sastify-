@@ -23,13 +23,26 @@ const server = express();
 
 connectToDB();
 
+const normalizeOrigin = (origin = "") => origin.trim().replace(/\/+$/, "");
+
 const allowedOrigins = (process.env.ORIGIN || "http://localhost:3000")
     .split(",")
-    .map((origin) => origin.trim());
+    .map(normalizeOrigin)
+    .filter(Boolean);
 
 server.use(
     cors({
-        origin: allowedOrigins,
+        origin: (origin, callback) => {
+            if (!origin) {
+                callback(null, true);
+                return;
+            }
+
+            const normalizedOrigin = normalizeOrigin(origin);
+            const isAllowed = allowedOrigins.includes(normalizedOrigin);
+
+            callback(null, isAllowed);
+        },
         credentials: true,
         exposedHeaders: ["X-Total-Count"],
         methods: ["GET", "POST", "PATCH", "DELETE"],
