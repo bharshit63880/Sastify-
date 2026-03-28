@@ -1,4 +1,4 @@
-import {axiosi} from '../../config/axios'
+import {axiosi, publicAxios} from '../../config/axios'
 
 export const createReview=async(review)=>{
     try {
@@ -10,10 +10,10 @@ export const createReview=async(review)=>{
 }
 export const fetchReviewsByProductId=async(id)=>{
     try {
-        const res=await axiosi.get(`/reviews/product/${id}`)
+        const res=await publicAxios.get(`/reviews/product/${id}`)
         return res.data
     } catch (error) {
-        throw error.response.data
+        throw error.response?.data || error
     }
 }
 

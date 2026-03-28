@@ -6,3 +6,7 @@ export const axiosi = axios.create({
   withCredentials: true,
   baseURL,
 })
+
+export const publicAxios = axios.create({
+  baseURL,
+})

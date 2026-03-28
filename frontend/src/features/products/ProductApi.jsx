@@ -1,4 +1,4 @@
-import { axiosi } from "../../config/axios";
+import { axiosi, publicAxios } from "../../config/axios";
 
 const appendValues = (params, key, value) => {
     if (!value) {
@@ -54,7 +54,7 @@ export const fetchProducts = async (filters = {}) => {
     }
 
     try {
-        const res = await axiosi.get(`/products?${params.toString()}`);
+        const res = await publicAxios.get(`/products?${params.toString()}`);
         const totalResults = Number(res.headers['x-total-count'] || 0);
         return { data: res.data, totalResults };
     } catch (error) {
@@ -64,7 +64,7 @@ export const fetchProducts = async (filters = {}) => {
 
 export const fetchProductById = async (id) => {
     try {
-        const res = await axiosi.get(`/products/${id}`);
+        const res = await publicAxios.get(`/products/${id}`);
         return res.data;
     } catch (error) {
         throw error.response?.data || error;
