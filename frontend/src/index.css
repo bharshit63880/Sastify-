@@ -1,0 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-background bg-hero-grid font-sans text-textPrimary antialiased;
+    background-color: #f4efe8;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(17, 17, 17, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, black, transparent 78%);
+    z-index: -1;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    @apply font-sans;
+  }
+
+  ::selection {
+    background: rgba(99, 102, 241, 0.35);
+    color: #f8fafc;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.45);
+    border-radius: 999px;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-black/5 bg-white/70 backdrop-blur-xl;
+  }
+
+  .surface-panel {
+    @apply rounded-3xl border border-border bg-card shadow-card;
+  }
+
+  .section-title {
+    @apply text-2xl font-semibold tracking-tight text-textPrimary md:text-3xl;
+  }
+
+  .hero-title {
+    @apply text-4xl font-bold leading-tight text-textPrimary sm:text-5xl;
+  }
+
+  .body-copy {
+    @apply text-base leading-7 text-textSecondary;
+  }
+
+  .small-copy {
+    @apply text-sm text-textSecondary;
+  }
+
+  .input-base {
+    @apply w-full rounded-2xl border border-border bg-[#fbf8f4] px-4 py-3 text-sm text-textPrimary placeholder:text-textSecondary/80 outline-none transition duration-200 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10;
+  }
+}
+
+.Toastify__toast {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #111111;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.Toastify__progress-bar {
+  background: linear-gradient(90deg, #111111, #444444);
+}
