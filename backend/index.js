@@ -38,6 +38,14 @@ server.use(
 server.use(express.json({ limit: "2mb" }));
 server.use(cookieParser());
 server.use(morgan("tiny"));
+server.use(async (req, res, next) => {
+    try {
+        await connectToDB();
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 server.use("/auth", authRoutes);
 server.use("/users", userRoutes);
