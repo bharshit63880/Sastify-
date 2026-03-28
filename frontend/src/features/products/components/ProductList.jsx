@@ -189,8 +189,7 @@ export const ProductList = ({
     inStock: false,
   });
 
-  const baseFilterKey = JSON.stringify(baseFilters);
-  const normalizedBaseFilters = useMemo(() => baseFilters, [baseFilterKey]);
+  const normalizedBaseFilters = baseFilters;
   const normalizedBaseCategory = useMemo(() => normalizedBaseFilters.category || [], [normalizedBaseFilters]);
 
   useEffect(() => {
