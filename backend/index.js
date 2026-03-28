@@ -24,6 +24,23 @@ const server = express();
 connectToDB();
 
 const normalizeOrigin = (origin = "") => origin.trim().replace(/\/+$/, "");
+const isVercelOrigin = (origin = "") => {
+    try {
+        const { hostname } = new URL(origin);
+        return hostname.endsWith(".vercel.app");
+    } catch (error) {
+        return false;
+    }
+};
+
+const isLocalOrigin = (origin = "") => {
+    try {
+        const { hostname } = new URL(origin);
+        return hostname === "localhost" || hostname === "127.0.0.1";
+    } catch (error) {
+        return false;
+    }
+};
 
 const allowedOrigins = (process.env.ORIGIN || "http://localhost:3000")
     .split(",")
@@ -39,9 +56,12 @@ server.use(
             }
 
             const normalizedOrigin = normalizeOrigin(origin);
-            const isAllowed = allowedOrigins.includes(normalizedOrigin);
+            const isAllowed =
+                allowedOrigins.includes(normalizedOrigin) ||
+                isVercelOrigin(normalizedOrigin) ||
+                isLocalOrigin(normalizedOrigin);
 
-            callback(null, isAllowed);
+            callback(null, isAllowed ? normalizedOrigin : false);
         },
         credentials: true,
         exposedHeaders: ["X-Total-Count"],
