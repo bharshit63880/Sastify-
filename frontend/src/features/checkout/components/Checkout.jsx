@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiCheckCircle,
   FiClock,
@@ -49,6 +49,7 @@ const loadRazorpayScript = () =>
 export const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const loggedInUser = useSelector(selectLoggedInUser);
   const addresses = useSelector(selectAddresses);
   const cartItems = useSelector(selectCartItems);
@@ -105,6 +106,16 @@ export const Checkout = () => {
         })
       );
   }, []);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const paymentStatus = searchParams.get("payment");
+    const paymentMessage = searchParams.get("message");
+
+    if (paymentStatus === "failed") {
+      setPaymentError(paymentMessage || "Payment failed. Please try again.");
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (selectedAddressId) {
@@ -217,6 +228,33 @@ export const Checkout = () => {
 
       dispatch(fetchCartByUserIdAsync());
       navigate(`/order-success/${verification.order._id}`);
+      return;
+    }
+
+    if (paymentConfig.provider === "payu") {
+      const paymentOrder = await createPaymentOrder({ addressId: selectedAddressId, couponCode });
+      const redirect = paymentOrder.redirect;
+
+      if (!redirect?.action || !redirect?.fields) {
+        setPaymentError("PayU checkout payload is unavailable. Please try again.");
+        return;
+      }
+
+      const form = document.createElement("form");
+      form.method = redirect.method || "POST";
+      form.action = redirect.action;
+      form.style.display = "none";
+
+      Object.entries(redirect.fields).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value ?? "";
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
       return;
     }
 

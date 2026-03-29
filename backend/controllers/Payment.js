@@ -6,8 +6,23 @@ const {
 const {
     createGatewayOrder,
     getGatewayConfig,
+    verifyPayUResponse,
     verifyGatewaySignature,
 } = require("../services/paymentGateway");
+
+const getBackendBaseUrl = (req) => {
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    const protocol = (Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto) || req.protocol || "https";
+    return `${protocol}://${req.get("host")}`;
+};
+
+const getFrontendBaseUrl = () =>
+    (process.env.ORIGIN || "http://localhost:3000")
+        .split(",")[0]
+        .trim()
+        .replace(/\/+$/, "");
+
+const redirectToFrontend = (res, path) => res.redirect(302, `${getFrontendBaseUrl()}${path}`);
 
 exports.getConfig = async (req, res) => {
     const config = getGatewayConfig();
@@ -30,11 +45,23 @@ exports.createPaymentOrder = async (req, res) => {
 
         const providerConfig = getGatewayConfig();
         const receipt = `receipt_${Date.now()}`;
+        const callbackUrl = `${getBackendBaseUrl(req)}/payments/payu/callback`;
         const gatewayOrder = await createGatewayOrder({
             amount: summary.pricing.total,
             receipt,
             notes: {
                 userId: req.user._id.toString(),
+                productinfo: `Sastify Order (${summary.items.length} items)`,
+                successUrl: callbackUrl,
+                failureUrl: callbackUrl,
+                customer: {
+                    firstname: req.user.name || "Sastify User",
+                    email: req.user.email || "support@sastify.com",
+                    phone: req.user.phone || "",
+                    udf1: req.user._id.toString(),
+                    udf2: req.body.addressId?.toString() || "",
+                    udf3: req.body.couponCode || "",
+                },
             },
         });
 
@@ -46,12 +73,19 @@ exports.createPaymentOrder = async (req, res) => {
             addressId: req.body.addressId,
             couponCode: req.body.couponCode || "",
             amount: summary.pricing.total,
-            status: "created",
+            status: providerConfig.provider === "payu" ? "pending" : "created",
             meta: {
                 pricing: summary.pricing,
                 items: summary.items,
                 testMode: Boolean(gatewayOrder.testMode),
                 testVerificationToken: gatewayOrder.testVerificationToken || "",
+                redirect: gatewayOrder.action
+                    ? {
+                        action: gatewayOrder.action,
+                        method: gatewayOrder.method || "POST",
+                        fields: gatewayOrder.fields || {},
+                    }
+                    : null,
             },
         });
 
@@ -67,6 +101,13 @@ exports.createPaymentOrder = async (req, res) => {
                     paymentId: gatewayOrder.testPaymentId,
                     signature: gatewayOrder.testSignature,
                     verificationToken: gatewayOrder.testVerificationToken,
+                }
+                : null,
+            redirect: gatewayOrder.action
+                ? {
+                    action: gatewayOrder.action,
+                    method: gatewayOrder.method || "POST",
+                    fields: gatewayOrder.fields || {},
                 }
                 : null,
             pricing: summary.pricing,
@@ -152,5 +193,69 @@ exports.verifyPayment = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(error.status || 500).json({ message: error.message || "Payment verification failed" });
+    }
+};
+
+exports.handlePayUCallback = async (req, res) => {
+    try {
+        const payload = req.body || {};
+        const payment = await Payment.findOne({ gatewayOrderId: payload.txnid });
+
+        if (!payment) {
+            return redirectToFrontend(res, "/checkout?payment=failed&message=Payment%20order%20not%20found");
+        }
+
+        const isVerified = verifyPayUResponse(payload);
+        const isSuccess = String(payload.status || "").toLowerCase() === "success";
+
+        payment.gatewayPaymentId = payload.mihpayid || "";
+        payment.gatewaySignature = payload.hash || "";
+        payment.meta = {
+            ...(payment.meta || {}),
+            payuResponse: payload,
+        };
+
+        if (!isVerified || !isSuccess) {
+            payment.status = "failed";
+            await payment.save();
+            const failureMessage = encodeURIComponent(payload.error_Message || payload.field9 || "Payment failed");
+            return redirectToFrontend(res, `/checkout?payment=failed&message=${failureMessage}`);
+        }
+
+        if (payment.order) {
+            payment.status = "paid";
+            payment.verified = true;
+            await payment.save();
+            return redirectToFrontend(res, `/order-success/${payment.order}`);
+        }
+
+        const order = await createOrderFromCheckout({
+            userId: payment.user,
+            addressId: payment.addressId,
+            couponCode: payment.couponCode,
+            paymentMethod: "online",
+            paymentGateway: getGatewayConfig().provider,
+            paymentGatewayOrderId: payment.gatewayOrderId,
+            paymentGatewayPaymentId: payload.mihpayid,
+            paymentStatus: "paid",
+            paymentVerified: true,
+            transactionMeta: {
+                provider: "payu",
+                status: payload.status,
+                mode: payload.mode,
+                bankcode: payload.bankcode,
+                testMode: Boolean(getGatewayConfig().testMode),
+            },
+        });
+
+        payment.status = "paid";
+        payment.verified = true;
+        payment.order = order._id;
+        await payment.save();
+
+        return redirectToFrontend(res, `/order-success/${order._id}`);
+    } catch (error) {
+        console.log(error);
+        return redirectToFrontend(res, "/checkout?payment=failed&message=Payment%20verification%20failed");
     }
 };

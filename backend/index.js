@@ -69,6 +69,7 @@ server.use(
     })
 );
 server.use(express.json({ limit: "2mb" }));
+server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser());
 server.use(morgan("tiny"));
 server.use(async (req, res, next) => {

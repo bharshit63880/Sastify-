@@ -7,5 +7,6 @@ const router = express.Router();
 router.get("/config", paymentController.getConfig);
 router.post("/create-order", verifyToken, paymentController.createPaymentOrder);
 router.post("/verify", verifyToken, paymentController.verifyPayment);
+router.post("/payu/callback", paymentController.handlePayUCallback);
 
 module.exports = router;
