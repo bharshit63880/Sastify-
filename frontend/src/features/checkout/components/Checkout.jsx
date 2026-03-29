@@ -2,6 +2,17 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  FiCheckCircle,
+  FiClock,
+  FiCreditCard,
+  FiMapPin,
+  FiPackage,
+  FiShield,
+  FiShoppingBag,
+  FiSmartphone,
+  FiTruck,
+} from "react-icons/fi";
 import { EmptyState } from "../../../components/EmptyState";
 import { Button } from "../../../components/ui/Button";
 import { Card } from "../../../components/ui/Card";
@@ -19,6 +30,7 @@ import {
   selectCheckoutPreview,
   selectCurrentOrder,
 } from "../../order/OrderSlice";
+import { ProductVisual } from "../../products/components/ProductVisual";
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
@@ -46,6 +58,7 @@ export const Checkout = () => {
 
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [onlineMode, setOnlineMode] = useState("upi");
   const [couponCode, setCouponCode] = useState("");
   const [paymentConfig, setPaymentConfig] = useState({
     enabled: false,
@@ -120,6 +133,51 @@ export const Checkout = () => {
       total: subtotal,
     };
   }, [cartItems, checkoutPreview]);
+
+  const paymentModes = useMemo(
+    () => [
+      {
+        id: "upi",
+        title: "UPI",
+        description: "Fastest checkout using supported UPI apps.",
+        icon: <FiSmartphone />,
+      },
+      {
+        id: "card",
+        title: "Card",
+        description: "Visa, Mastercard and other supported cards.",
+        icon: <FiCreditCard />,
+      },
+      {
+        id: "banking",
+        title: "Net banking",
+        description: "Continue with your bank's secure payment flow.",
+        icon: <FiShield />,
+      },
+    ],
+    []
+  );
+
+  const checkoutHighlights = useMemo(
+    () => [
+      {
+        title: "Secure checkout",
+        description: paymentMethod === "online" ? "Your payment is processed through the configured gateway." : "Your order will be confirmed with secure order tracking.",
+        icon: <FiShield />,
+      },
+      {
+        title: "Fast dispatch",
+        description: "Live cart pricing and delivery details are applied before confirmation.",
+        icon: <FiTruck />,
+      },
+      {
+        title: "Order updates",
+        description: "You'll receive order status updates after the payment or COD confirmation.",
+        icon: <FiClock />,
+      },
+    ],
+    [paymentMethod]
+  );
 
   const handleAddAddress = (data) => {
     dispatch(addAddressAsync(data));
@@ -214,14 +272,90 @@ export const Checkout = () => {
     <PageWrapper className="space-y-0 py-6 md:py-8">
       <Card
         hover={false}
-        className="rounded-[28px] border border-border bg-white px-5 py-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
+        className="overflow-hidden rounded-[28px] border border-border bg-white px-5 py-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
       >
-        <div className="space-y-3">
-          <span className="inline-flex rounded-full border border-border bg-[#faf7f2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-textPrimary">
-          Checkout
-          </span>
-          <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary md:text-4xl">Secure your order</h1>
-          <p className="text-sm text-textSecondary">Review saved addresses, choose a payment method, and confirm pricing from live backend data.</p>
+        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div className="space-y-4">
+            <span className="inline-flex rounded-full border border-border bg-[#faf7f2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-textPrimary">
+              Checkout
+            </span>
+            <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary md:text-4xl">
+              Payment & delivery details
+            </h1>
+            <p className="max-w-2xl text-sm leading-7 text-textSecondary">
+              Enter shipping details, review live pricing, and continue with a premium secure payment flow that still uses the existing backend logic.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {checkoutHighlights.map((item) => (
+                <div key={item.title} className="rounded-[24px] border border-border bg-[#faf7f2] p-4">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-textPrimary">
+                    {item.icon}
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-textPrimary">{item.title}</p>
+                  <p className="mt-1 text-xs leading-6 text-textSecondary">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-border bg-[#eff7ff] p-5 sm:p-6">
+            <div className="space-y-4">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#48739a]">Payment information</p>
+              <div className="grid grid-cols-3 gap-3">
+                {paymentModes.map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod("online");
+                      setOnlineMode(mode.id);
+                    }}
+                    className={[
+                      "rounded-[22px] border p-4 text-left transition",
+                      paymentMethod === "online" && onlineMode === mode.id
+                        ? "border-[#4aa5e8] bg-white shadow-[0_12px_30px_rgba(74,165,232,0.18)]"
+                        : "border-[#c8dfef] bg-white/80 hover:border-[#8cc4ea]",
+                    ].join(" ")}
+                  >
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf6ff] text-[#2d7fba]">
+                      {mode.icon}
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-textPrimary">{mode.title}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-[24px] border border-[#cfe5f5] bg-white p-4 sm:p-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-[18px] border border-border bg-[#fbfdff] px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Email</p>
+                    <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.email || "Sign in to continue"}</p>
+                  </div>
+                  <div className="rounded-[18px] border border-border bg-[#fbfdff] px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Card holder</p>
+                    <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.name || "Guest checkout disabled"}</p>
+                  </div>
+                  <div className="sm:col-span-2 rounded-[18px] border border-[#9ad0f0] bg-[#f8fdff] px-4 py-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#48739a]">Selected payment</p>
+                        <p className="mt-2 text-sm font-medium text-textPrimary">
+                          {paymentMethod === "online"
+                            ? `${paymentModes.find((mode) => mode.id === onlineMode)?.title || "Online payment"} will continue in the secure gateway window`
+                            : "Cash on Delivery selected"}
+                        </p>
+                      </div>
+                      <FiCheckCircle className="shrink-0 text-2xl text-[#2ea86b]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs leading-6 text-[#5a7f9f]">
+                This section is styled like a premium payment form, but the actual transaction still runs through the configured secure gateway or COD flow.
+              </p>
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -240,7 +374,7 @@ export const Checkout = () => {
                     className={[
                       "flex cursor-pointer items-start gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
                       selectedAddressId === address._id
-                        ? "border-primary/30 bg-primary/10"
+                        ? "border-primary/30 bg-primary/10 shadow-[0_12px_28px_rgba(99,102,241,0.08)]"
                         : "border-border bg-[#faf7f2]",
                     ].join(" ")}
                   >
@@ -251,7 +385,14 @@ export const Checkout = () => {
                       className="mt-1 accent-primary"
                     />
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-textPrimary">{address.fullName || loggedInUser?.name}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-textPrimary">{address.fullName || loggedInUser?.name}</p>
+                        {address.isDefault ? (
+                          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-textPrimary">
+                            Default
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="text-sm text-textSecondary">
                         {address.line1 || address.street}, {address.city}, {address.state} - {address.postalCode}
                       </p>
@@ -349,6 +490,32 @@ export const Checkout = () => {
                   </div>
                 </label>
               </div>
+
+              {paymentMethod === "online" ? (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {paymentModes.map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setOnlineMode(mode.id)}
+                      className={[
+                        "rounded-[22px] border p-4 text-left transition",
+                        onlineMode === mode.id
+                          ? "border-[#111111] bg-[#111111] text-white"
+                          : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                      ].join(" ")}
+                    >
+                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-inherit">
+                        {mode.icon}
+                      </div>
+                      <p className="mt-3 text-sm font-semibold">{mode.title}</p>
+                      <p className={["mt-1 text-xs leading-5", onlineMode === mode.id ? "text-white/70" : "text-textSecondary"].join(" ")}>
+                        {mode.description}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </Card>
         </div>
@@ -365,11 +532,32 @@ export const Checkout = () => {
 
             <div className="space-y-3">
               {cartItems.map((item) => (
-                <div key={item._id} className="flex items-start justify-between gap-3 text-sm">
-                  <span className="min-w-0 flex-1 pr-3 text-textSecondary">
-                    {item.product.name || item.product.title} × {item.quantity}
-                  </span>
-                  <span className="shrink-0 text-textPrimary">{formatPrice(item.product.price * item.quantity)}</span>
+                <div key={item._id} className="flex items-start gap-3 rounded-[22px] border border-border bg-[#faf7f2] p-3">
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[18px] bg-white p-2">
+                    <ProductVisual
+                      product={item.product}
+                      alt={item.product.name || item.product.title}
+                      imageClassName="h-full w-full object-contain mix-blend-multiply"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-sm font-semibold text-textPrimary">
+                      {item.product.name || item.product.title}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-textSecondary">
+                      <span className="inline-flex items-center gap-1">
+                        <FiPackage />
+                        Qty {item.quantity}
+                      </span>
+                      {selectedAddressId ? (
+                        <span className="inline-flex items-center gap-1">
+                          <FiMapPin />
+                          Delivery linked
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-textPrimary">{formatPrice(item.product.price * item.quantity)}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -405,6 +593,24 @@ export const Checkout = () => {
             <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-textPrimary">Total payable</span>
               <span className="text-2xl font-semibold text-textPrimary">{formatPrice(summary.total)}</span>
+            </div>
+
+            <div className="rounded-[24px] border border-border bg-[#faf7f2] p-4">
+              <div className="flex items-start gap-3">
+                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-textPrimary">
+                  <FiShield />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-textPrimary">
+                    {paymentMethod === "online" ? "Secure gateway handoff" : "Cash on delivery confirmation"}
+                  </p>
+                  <p className="mt-1 text-xs leading-6 text-textSecondary">
+                    {paymentMethod === "online"
+                      ? "After tapping the payment button, the secure provider window opens for UPI, card, or bank authorization."
+                      : "Your order will be placed instantly and payment will happen at delivery."}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {paymentError ? <p className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-600">{paymentError}</p> : null}
