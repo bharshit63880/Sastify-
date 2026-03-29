@@ -16,6 +16,8 @@ const Wishlist = require("../models/Wishlist");
 const { slugify } = require("../utils/slugify");
 
 const PRODUCTS_PER_CATEGORY = 22;
+const TARGET_PRODUCT_COUNT = 100;
+const TARGET_REVIEW_COUNT = 15;
 const GENERATED_CUSTOMER_COUNT = 140;
 const GENERATED_ORDER_COUNT = 240;
 
@@ -229,14 +231,23 @@ const baseSpecs = {
 
 const getBrandsForCategory = (category, brands) => brands.filter((brand) => brand.tags.some((tag) => category.brandTags.includes(tag)));
 const buildHighlights = (category, brand, cfg, index) => [`${pick(cfg.d, index)} design tuned for Indian households and daily use.`, `${brand.name} backed product configuration with marketplace-ready packaging.`, `${pick(cfg.c, index)} finish matched with practical everyday usability.`, `${category.productType} setup designed for value, reliability, and repeat usage.`];
+const getProductAt = (products, index) => products[index % products.length];
 
 const buildProductsData = (categories, brands) => {
   const products = [];
   categories.forEach((category, categoryIndex) => {
+    if (products.length >= TARGET_PRODUCT_COUNT) {
+      return;
+    }
+
     const cfg = segments[category.segment];
     const priceStep = cfg.p[1] > 20000 ? 500 : cfg.p[1] > 5000 ? 100 : 50;
     const matchingBrands = getBrandsForCategory(category, brands);
     for (let i = 0; i < PRODUCTS_PER_CATEGORY; i += 1) {
+      if (products.length >= TARGET_PRODUCT_COUNT) {
+        break;
+      }
+
       const idx = categoryIndex * PRODUCTS_PER_CATEGORY + i;
       const brand = pick(matchingBrands, idx);
       const name = `${brand.name} ${pick(cfg.d, idx)} ${category.productType} ${pick(["Neo", "Prime", "Max", "Select", "Edge", "Lite"], idx)} ${100 + ((idx * 17) % 900)}`;
@@ -282,7 +293,12 @@ const buildReviewDocs = (products, users) => {
   const stats = {};
   const customers = users.filter((user) => !user.isAdmin);
   products.forEach((product, productIndex) => {
-    const count = 2 + (productIndex % 4);
+    if (docs.length >= TARGET_REVIEW_COUNT) {
+      stats[product._id.toString()] = { rating: 0, reviewCount: 0 };
+      return;
+    }
+
+    const count = Math.min(1, TARGET_REVIEW_COUNT - docs.length);
     let sum = 0;
     for (let reviewIndex = 0; reviewIndex < count; reviewIndex += 1) {
       const reviewer = customers[(productIndex * 7 + reviewIndex * 11) % customers.length];
@@ -377,8 +393,30 @@ async function seed() {
 
   const riyaUser = seededUsers.find((user) => user.email === "riya.sharma@sastify.com");
   const arjunUser = seededUsers.find((user) => user.email === "arjun.mehta@sastify.com");
-  await Wishlist.insertMany([{ user: riyaUser._id, product: products[3]._id }, { user: riyaUser._id, product: products[11]._id }, { user: arjunUser._id, product: products[8]._id }]);
-  await Cart.insertMany([{ user: riyaUser._id, product: products[21]._id, quantity: 1, color: products[21].colors?.[0] || "" }, { user: riyaUser._id, product: products[42]._id, quantity: 2, size: products[42].sizes?.[0] || "" }, { user: arjunUser._id, product: products[65]._id, quantity: 1 }]);
+  await Wishlist.insertMany([
+    { user: riyaUser._id, product: getProductAt(products, 3)._id },
+    { user: riyaUser._id, product: getProductAt(products, 11)._id },
+    { user: arjunUser._id, product: getProductAt(products, 8)._id },
+  ]);
+  await Cart.insertMany([
+    {
+      user: riyaUser._id,
+      product: getProductAt(products, 21)._id,
+      quantity: 1,
+      color: getProductAt(products, 21).colors?.[0] || "",
+    },
+    {
+      user: riyaUser._id,
+      product: getProductAt(products, 42)._id,
+      quantity: 2,
+      size: getProductAt(products, 42).sizes?.[0] || "",
+    },
+    {
+      user: arjunUser._id,
+      product: getProductAt(products, 65)._id,
+      quantity: 1,
+    },
+  ]);
 
   console.log("Seed completed successfully.");
   console.log(`Categories seeded: ${categories.length}`);
