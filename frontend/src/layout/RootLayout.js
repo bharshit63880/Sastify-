@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { ScrollToTop } from "../components/ScrollToTop";
 import { Container } from "../components/ui/Container";
 import { Footer } from "../features/footer/Footer";
 import { Navbar } from "../features/navigation/components/Navbar";
@@ -7,6 +8,7 @@ import { Navbar } from "../features/navigation/components/Navbar";
 export const RootLayout = () => {
   return (
     <div className="min-h-screen">
+      <ScrollToTop />
       <Navbar />
       <main className="min-h-[70vh]">
         <Container>

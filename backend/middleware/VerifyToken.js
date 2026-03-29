@@ -5,6 +5,24 @@ const User = require("../models/User");
 const unauthorized = (res, message = "Please login to continue") =>
     res.status(401).json({ message });
 
+const getTokenFromRequest = (req) => {
+    const cookieToken = req.cookies?.token;
+    if (cookieToken) {
+        return cookieToken;
+    }
+
+    const authHeader = req.headers?.authorization || req.headers?.Authorization;
+    if (!authHeader || typeof authHeader !== "string") {
+        return null;
+    }
+
+    if (!authHeader.startsWith("Bearer ")) {
+        return null;
+    }
+
+    return authHeader.slice(7).trim();
+};
+
 const buildRequestUser = async (token) => {
     const decodedInfo = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -29,7 +47,7 @@ const buildRequestUser = async (token) => {
 
 exports.verifyToken = async (req, res, next) => {
     try {
-        const { token } = req.cookies;
+        const token = getTokenFromRequest(req);
 
         if (!token) {
             return unauthorized(res);
@@ -68,7 +86,7 @@ exports.requireAdmin = (req, res, next) => {
 
 exports.attachUserIfPresent = async (req, res, next) => {
     try {
-        const { token } = req.cookies;
+        const token = getTokenFromRequest(req);
 
         if (!token) {
             return next();

@@ -464,7 +464,7 @@ export const ProductDetails = () => {
         <Section className="pt-8">
           <div className="space-y-6">
             <h2 className="text-3xl font-black uppercase tracking-tight text-textPrimary">YOU MIGHT ALSO LIKE</h2>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
               {product.relatedProducts.slice(0, 4).map((item) => (
                 <ProductCard key={item._id} product={item} />
               ))}

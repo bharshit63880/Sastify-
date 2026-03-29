@@ -183,7 +183,7 @@ export const HomePage = () => {
                 </Button>
               }
             />
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
               {(sections[section.key] || []).map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}

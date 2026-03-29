@@ -221,6 +221,7 @@ const authSlice=createSlice({
             .addCase(checkAuthAsync.rejected,(state,action)=>{
                 state.status='rejected'
                 state.errors=action.error
+                state.loggedInUser=null
                 state.isAuthChecked=true
             })
             

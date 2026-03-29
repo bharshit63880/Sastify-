@@ -34,7 +34,7 @@ exports.signup = async (req, res) => {
         const token = generateToken(secureInfo);
 
         res.cookie("token", token, cookieOptions);
-        res.status(201).json(secureInfo);
+        res.status(201).json({ ...secureInfo, token });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error occurred during signup, please try again later" });
@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
         const token = generateToken(secureInfo);
 
         res.cookie("token", token, cookieOptions);
-        return res.status(200).json(secureInfo);
+        return res.status(200).json({ ...secureInfo, token });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Some error occurred while logging in, please try again later" });
@@ -91,7 +91,10 @@ exports.verifyOtp = async (req, res) => {
                 { isVerified: true },
                 { new: true }
             );
-            return res.status(200).json(sanitizeUser(verifiedUser));
+            const secureInfo = sanitizeUser(verifiedUser);
+            const token = generateToken(secureInfo);
+            res.cookie("token", token, cookieOptions);
+            return res.status(200).json({ ...secureInfo, token });
         }
 
         return res.status(400).json({ message: "Otp is invalid or expired" });

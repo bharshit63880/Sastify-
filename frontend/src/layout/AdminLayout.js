@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FiBox, FiGrid, FiLogOut, FiMenu, FiPackage, FiUsers, FiX } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ScrollToTop } from "../components/ScrollToTop";
 import { Button } from "../components/ui/Button";
 import { Container } from "../components/ui/Container";
 import { logoutAsync } from "../features/auth/AuthSlice";
@@ -87,6 +88,7 @@ export const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <ScrollToTop />
       <div className="flex min-h-screen">
         <div className="hidden lg:block">{navContent}</div>
 
