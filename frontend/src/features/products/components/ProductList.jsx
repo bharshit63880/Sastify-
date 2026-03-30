@@ -223,6 +223,19 @@ export const ProductList = ({
 
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
+  const availableBrands = useMemo(() => {
+    const activeBrandIds = new Set(filters.brand);
+
+    products.forEach((product) => {
+      const brandId = product?.brand?._id || product?.brand;
+      if (brandId) {
+        activeBrandIds.add(String(brandId));
+      }
+    });
+
+    return brands.filter((brand) => activeBrandIds.has(String(brand._id)));
+  }, [brands, filters.brand, products]);
+
   const activeChips = useMemo(() => {
     const chips = [];
 
@@ -272,14 +285,14 @@ export const ProductList = ({
     });
 
   return (
-    <PageWrapper className="space-y-0 py-6 md:py-8">
-      <Section className="pt-4">
+    <PageWrapper className="space-y-0 py-4 md:py-6">
+      <Section className="pt-2">
         <Card
           hover={false}
-          className="rounded-[28px] border border-border bg-white px-5 py-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
+          className="rounded-[28px] border border-border bg-white px-5 py-5 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-6 md:rounded-[32px] lg:px-8"
         >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-2">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-textSecondary">Category page</p>
               <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary sm:text-4xl">{title}</h1>
               <p className="max-w-2xl text-base leading-7 text-textSecondary">{description}</p>
@@ -302,8 +315,8 @@ export const ProductList = ({
         </Card>
       </Section>
 
-      <Section className="pt-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+      <Section className="pt-4">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
           <div className="hidden w-full max-w-[290px] xl:block">
             <Card
               hover={false}
@@ -313,7 +326,7 @@ export const ProductList = ({
                 filters={filters}
                 setFilters={setFilters}
                 categories={categories}
-                brands={brands}
+                brands={availableBrands}
                 lockedCategoryId={baseFilters.category?.[0]}
               />
             </Card>
@@ -322,7 +335,7 @@ export const ProductList = ({
           <div className="flex-1 space-y-6">
             <Card
               hover={false}
-              className="rounded-[28px] border border-border bg-white px-4 py-5 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-5 md:px-6"
+              className="rounded-[28px] border border-border bg-white px-4 py-4 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-5 md:px-6"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-wrap gap-2">
@@ -360,7 +373,7 @@ export const ProductList = ({
               <LoadingState />
             ) : products.length ? (
               <>
-                <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                   {products.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
@@ -445,7 +458,7 @@ export const ProductList = ({
                   filters={filters}
                   setFilters={setFilters}
                   categories={categories}
-                  brands={brands}
+                  brands={availableBrands}
                   lockedCategoryId={baseFilters.category?.[0]}
                 />
               </Card>
