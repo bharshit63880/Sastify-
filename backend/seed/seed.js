@@ -16,6 +16,7 @@ const Wishlist = require("../models/Wishlist");
 const { slugify } = require("../utils/slugify");
 
 const PRODUCTS_PER_CATEGORY = 22;
+const TARGET_CATEGORY_COUNT = 10;
 const TARGET_PRODUCT_COUNT = 100;
 const TARGET_REVIEW_COUNT = 15;
 const GENERATED_CUSTOMER_COUNT = 140;
@@ -320,9 +321,19 @@ async function seed() {
   await connectToDB();
   await Promise.all([Wishlist.deleteMany({}), Cart.deleteMany({}), Payment.deleteMany({}), Order.deleteMany({}), Review.deleteMany({}), Address.deleteMany({}), Coupon.deleteMany({}), Product.deleteMany({}), Brand.deleteMany({}), Category.deleteMany({}), User.deleteMany({})]);
 
-  const categories = await Category.insertMany(categoryRows.map(([name, , , , description]) => ({ name, description, isActive: true })));
+  const limitedCategoryRows = categoryRows.slice(0, TARGET_CATEGORY_COUNT);
+  const categories = await Category.insertMany(
+    limitedCategoryRows.map(([name, , , , description]) => ({ name, description, isActive: true }))
+  );
   const brands = await Brand.insertMany(brandRows.map(([name, , description]) => ({ name, description, isActive: true })));
-  const categoriesWithMeta = categoryRows.map(([name, productType, segment, brandTags, description]) => ({ name, productType, segment, brandTags, description, _id: categories.find((entry) => entry.name === name)._id }));
+  const categoriesWithMeta = limitedCategoryRows.map(([name, productType, segment, brandTags, description]) => ({
+    name,
+    productType,
+    segment,
+    brandTags,
+    description,
+    _id: categories.find((entry) => entry.name === name)._id,
+  }));
   const brandsWithMeta = brandRows.map(([name, tags, description]) => ({ name, tags, description, _id: brands.find((entry) => entry.name === name)._id }));
 
   const adminPassword = await bcrypt.hash("Admin@123", 10);
