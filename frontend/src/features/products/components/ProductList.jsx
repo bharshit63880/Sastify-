@@ -175,7 +175,6 @@ export const ProductList = ({
   const [products, setProducts] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [productFetchStatus, setProductFetchStatus] = useState("idle");
-  const baseFiltersKey = JSON.stringify(baseFilters || EMPTY_BASE_FILTERS);
   const stableBaseFilters = useMemo(
     () => baseFilters || EMPTY_BASE_FILTERS,
     [baseFilters]
@@ -195,6 +194,7 @@ export const ProductList = ({
     inStock: false,
   });
   const filtersKey = JSON.stringify(filters);
+  const invalidPriceRange = filters.priceRange[0] > filters.priceRange[1];
   const requestPayload = useMemo(
     () => ({
       ...stableBaseFilters,
@@ -243,7 +243,7 @@ export const ProductList = ({
 
   useEffect(() => {
     let isActive = true;
-    if (filters.priceRange?.[0] > filters.priceRange?.[1]) {
+    if (invalidPriceRange) {
       setProducts([]);
       setTotalResults(0);
       setProductFetchStatus("fulfilled");
@@ -276,7 +276,7 @@ export const ProductList = ({
     return () => {
       isActive = false;
     };
-  }, [requestPayload]);
+  }, [invalidPriceRange, requestPayload]);
 
   useEffect(() => {
     setPage(1);
