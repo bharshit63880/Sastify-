@@ -55,30 +55,30 @@ export const ProductCard = ({ product }) => {
   };
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-border bg-white p-0 shadow-[0_14px_28px_rgba(17,17,17,0.05)] sm:rounded-[28px] sm:shadow-[0_20px_40px_rgba(17,17,17,0.06)]">
-      <div className="relative border-b border-border bg-[#f8f4ee]">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[#e9dfd1] bg-white p-0 shadow-[0_16px_34px_rgba(17,17,17,0.05)] sm:rounded-[34px]">
+      <div className="relative bg-white px-6 pt-6">
         <Link to={`/products/${product.slug || product._id}`} className="block">
           <motion.div
             whileHover={{ y: -6, scale: 1.03 }}
             transition={{ duration: 0.35 }}
-            className="h-44 w-full p-3 sm:h-56 sm:p-4 lg:h-72 lg:p-6"
+            className="h-[270px] w-full rounded-[28px] border border-[#efe6d9] bg-[#f8f4ee] p-6 sm:h-[290px]"
           >
             <ProductVisual
               product={product}
               alt={product.name || product.title}
-              imageClassName="h-full w-full object-contain mix-blend-multiply"
+              imageClassName="h-full w-full rounded-[20px] object-contain mix-blend-multiply"
             />
           </motion.div>
         </Link>
 
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 sm:left-4 sm:top-4 sm:gap-2">
+        <div className="absolute left-12 top-12 flex flex-wrap gap-2">
           {product.discountPercent > 0 ? (
-            <span className="rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white sm:px-3 sm:text-[11px] sm:tracking-[0.18em]">
+            <span className="rounded-full bg-[#111111] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
               {product.discountPercent}% off
             </span>
           ) : null}
           {stock > 0 && stock < 8 ? (
-            <span className="rounded-full border border-[#e6d7c3] bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a5a24] sm:px-3 sm:text-[11px] sm:tracking-[0.18em]">
+            <span className="rounded-full border border-[#e6d7c3] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#8a5a24]">
               Low stock
             </span>
           ) : null}
@@ -87,7 +87,7 @@ export const ProductCard = ({ product }) => {
         <button
           onClick={handleWishlist}
           className={[
-            "absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm transition sm:right-4 sm:top-4 sm:h-11 sm:w-11 sm:text-base",
+            "absolute right-12 top-12 inline-flex h-14 w-14 items-center justify-center rounded-full border text-base transition",
             isWishlisted
               ? "border-[#f0c5d1] bg-[#fff1f5] text-[#d14d72]"
               : "border-border bg-white text-textPrimary hover:border-[#111111]",
@@ -98,20 +98,20 @@ export const ProductCard = ({ product }) => {
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-5">
-        <div className="space-y-1.5 sm:space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-textSecondary sm:text-[11px] sm:tracking-[0.22em]">
+      <div className="flex flex-1 flex-col gap-4 px-6 pb-6 pt-5">
+        <div className="space-y-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-textSecondary">
             {product.brand?.name || product.brandName || "Shopco"}
           </p>
           <Link
             to={`/products/${product.slug || product._id}`}
-            className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-5 text-textPrimary transition hover:text-[#444444] sm:min-h-[3rem] sm:text-base sm:leading-6"
+            className="line-clamp-2 min-h-[5.5rem] text-[21px] font-semibold leading-[1.32] tracking-[-0.02em] text-textPrimary transition hover:text-[#444444]"
           >
             {product.name || product.title}
           </Link>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-textSecondary sm:gap-2 sm:text-sm">
+        <div className="flex items-center gap-2 text-sm text-textSecondary">
           <span className="inline-flex items-center gap-1">
             <FiStar className="fill-current text-[#f5b301]" />
             <span className="font-medium text-textPrimary">{rating.toFixed(1)}</span>
@@ -119,34 +119,33 @@ export const ProductCard = ({ product }) => {
           <span>({reviewCount})</span>
         </div>
 
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-base font-bold text-textPrimary sm:text-xl">{formatPrice(product.price)}</p>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-end gap-2">
+            <p className="text-[2.2rem] font-bold leading-none tracking-[-0.04em] text-textPrimary">{formatPrice(product.price)}</p>
             {product.originalPrice > product.price ? (
-              <p className="text-xs text-textSecondary line-through sm:text-sm">{formatPrice(product.originalPrice)}</p>
+              <p className="pb-1 text-lg text-textSecondary line-through">{formatPrice(product.originalPrice)}</p>
             ) : null}
           </div>
-          <p className={stock > 0 ? "text-xs text-textSecondary" : "text-xs text-[#d14d72]"}>
-            {stock > 0 ? `${stock} available` : "Out of stock"}
+          <p className={stock > 0 ? "text-base font-medium text-textSecondary" : "text-base font-medium text-[#d14d72]"}>
+            {stock > 0 ? `${stock} in stock` : "Out of stock"}
           </p>
         </div>
 
-        <div className="mt-auto flex items-center gap-2 sm:gap-3">
+        <div className="mt-auto flex items-center gap-3 pt-1">
           <Button
             fullWidth
             variant={isInCart ? "secondary" : "primary"}
-            icon={<FiShoppingBag />}
             disabled={stock === 0}
             onClick={handleAddToCart}
-            className="rounded-full px-3 py-2.5 text-xs sm:px-5 sm:py-3 sm:text-sm"
+            className="min-h-[64px] rounded-full px-6 py-4 text-[18px] font-semibold"
           >
             {isInCart ? "In cart" : "Add to cart"}
           </Button>
           <Link
             to={`/products/${product.slug || product._id}`}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-white text-textPrimary transition hover:border-[#111111] hover:bg-[#f8f4ee] sm:h-12 sm:w-12"
+            className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#e3d8ca] bg-white text-textPrimary transition hover:border-[#111111] hover:bg-[#f8f4ee]"
           >
-            <FiEye />
+            <FiEye className="text-xl" />
           </Link>
         </div>
       </div>

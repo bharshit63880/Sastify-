@@ -64,15 +64,30 @@ export const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
+
     Promise.all(sectionConfig.map((section) => fetchProducts(section.filters)))
       .then((responses) => {
+        if (!isActive) {
+          return;
+        }
+
         const nextState = {};
         responses.forEach((response, index) => {
           nextState[sectionConfig[index].key] = response.data;
         });
         setSections(nextState);
       })
-      .finally(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => {
+        if (isActive) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   const heroStats = useMemo(

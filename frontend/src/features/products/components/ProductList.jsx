@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiFilter, FiSliders, FiX } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { EmptyState } from "../../../components/EmptyState";
 import { LoadingState } from "../../../components/LoadingState";
 import { NewsletterBanner } from "../../../components/NewsletterBanner";
@@ -13,13 +13,7 @@ import { Section } from "../../../components/ui/Section";
 import { ITEMS_PER_PAGE } from "../../../constants";
 import { selectBrands } from "../../brands/BrandSlice";
 import { selectCategories } from "../../categories/CategoriesSlice";
-import {
-  fetchProductsAsync,
-  resetProductFetchStatus,
-  selectProductFetchStatus,
-  selectProductTotalResults,
-  selectProducts,
-} from "../ProductSlice";
+import { fetchProducts } from "../ProductApi";
 import { ProductCard } from "./ProductCard";
 
 const sortOptions = [
@@ -30,6 +24,8 @@ const sortOptions = [
   { label: "Best Rated", value: "rating" },
   { label: "Discount", value: "discount" },
 ];
+
+const EMPTY_BASE_FILTERS = Object.freeze({});
 
 const FilterChip = ({ active, children, onClick, disabled = false }) => (
   <button
@@ -168,20 +164,26 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
 export const ProductList = ({
   title = "CASUAL",
   description = "Explore the catalog in a cleaner, more fashion-led grid with the same product data and flows.",
-  baseFilters = {},
+  baseFilters,
 }) => {
-  const dispatch = useDispatch();
-  const products = useSelector(selectProducts);
-  const totalResults = useSelector(selectProductTotalResults);
-  const productFetchStatus = useSelector(selectProductFetchStatus);
   const brands = useSelector(selectBrands);
   const categories = useSelector(selectCategories);
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("relevance");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [totalResults, setTotalResults] = useState(0);
+  const [productFetchStatus, setProductFetchStatus] = useState("idle");
+  const stableBaseFilters = baseFilters || EMPTY_BASE_FILTERS;
+  const normalizedBaseCategory = useMemo(
+    () => (Array.isArray(stableBaseFilters?.category) ? stableBaseFilters.category : []),
+    [stableBaseFilters?.category]
+  );
+  const baseCategoryKey = normalizedBaseCategory.join("|");
+  const baseSearch = stableBaseFilters?.search || "";
   const [filters, setFilters] = useState({
-    category: baseFilters.category || [],
+    category: normalizedBaseCategory,
     brand: [],
     priceRange: [0, 250000],
     rating: 0,
@@ -189,37 +191,64 @@ export const ProductList = ({
     inStock: false,
   });
 
-  const normalizedBaseFilters = baseFilters;
-  const normalizedBaseCategory = useMemo(() => normalizedBaseFilters.category || [], [normalizedBaseFilters]);
-
   useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      category: normalizedBaseCategory,
-    }));
+    setFilters((prev) => {
+      const sameCategory =
+        prev.category.length === normalizedBaseCategory.length &&
+        prev.category.every((item, index) => item === normalizedBaseCategory[index]);
+
+      if (sameCategory) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        category: normalizedBaseCategory,
+      };
+    });
     setPage(1);
-  }, [normalizedBaseCategory]);
+  }, [baseCategoryKey, normalizedBaseCategory]);
 
   useEffect(() => {
-    dispatch(
-      fetchProductsAsync({
-        ...normalizedBaseFilters,
-        category: filters.category,
-        brand: filters.brand,
-        minPrice: filters.priceRange[0],
-        maxPrice: filters.priceRange[1],
-        rating: filters.rating || undefined,
-        discount: filters.discount || undefined,
-        inStock: filters.inStock || undefined,
-        pagination: { page, limit: ITEMS_PER_PAGE },
-        sort,
+    let isActive = true;
+
+    setProductFetchStatus("pending");
+
+    fetchProducts({
+      ...stableBaseFilters,
+      search: baseSearch || undefined,
+      category: filters.category,
+      brand: filters.brand,
+      minPrice: filters.priceRange[0],
+      maxPrice: filters.priceRange[1],
+      rating: filters.rating || undefined,
+      discount: filters.discount || undefined,
+      inStock: filters.inStock || undefined,
+      pagination: { page, limit: ITEMS_PER_PAGE },
+      sort,
+    })
+      .then((response) => {
+        if (!isActive) {
+          return;
+        }
+
+        setProducts(Array.isArray(response.data) ? response.data : []);
+        setTotalResults(Number(response.totalResults || 0));
+        setProductFetchStatus("fulfilled");
       })
-    );
+      .catch(() => {
+        if (!isActive) {
+          return;
+        }
+
+        setProducts([]);
+        setProductFetchStatus("rejected");
+      });
 
     return () => {
-      dispatch(resetProductFetchStatus());
+      isActive = false;
     };
-  }, [dispatch, filters, normalizedBaseFilters, page, sort]);
+  }, [baseCategoryKey, baseSearch, filters, page, sort, stableBaseFilters]);
 
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
@@ -327,7 +356,7 @@ export const ProductList = ({
                 setFilters={setFilters}
                 categories={categories}
                 brands={availableBrands}
-                lockedCategoryId={baseFilters.category?.[0]}
+                lockedCategoryId={normalizedBaseCategory[0]}
               />
             </Card>
           </div>
@@ -459,7 +488,7 @@ export const ProductList = ({
                   setFilters={setFilters}
                   categories={categories}
                   brands={availableBrands}
-                  lockedCategoryId={baseFilters.category?.[0]}
+                  lockedCategoryId={normalizedBaseCategory[0]}
                 />
               </Card>
             </motion.div>
