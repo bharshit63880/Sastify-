@@ -182,7 +182,7 @@ export const ProductList = ({
   );
   const normalizedBaseCategory = useMemo(
     () => (Array.isArray(stableBaseFilters?.category) ? stableBaseFilters.category : []),
-    [stableBaseFilters?.category]
+    [stableBaseFilters]
   );
   const baseCategoryKey = normalizedBaseCategory.join("|");
   const baseSearch = stableBaseFilters?.search || "";
@@ -194,6 +194,7 @@ export const ProductList = ({
     discount: 0,
     inStock: false,
   });
+  const filtersKey = JSON.stringify(filters);
 
   useEffect(() => {
     setFilters((prev) => {
@@ -269,7 +270,6 @@ export const ProductList = ({
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
   const availableBrands = brands;
-  const filtersKey = JSON.stringify(filters);
 
   const activeChips = useMemo(() => {
     const chips = [];
