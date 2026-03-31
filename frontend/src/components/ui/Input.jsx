@@ -19,7 +19,7 @@ export const Input = React.forwardRef(
 
     return (
       <label className="flex w-full flex-col gap-2">
-        {label ? <span className="text-sm font-medium text-textPrimary">{label}</span> : null}
+        {label ? <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">{label}</span> : null}
         <Element
           ref={ref}
           rows={as === "textarea" ? rows : undefined}
@@ -29,7 +29,7 @@ export const Input = React.forwardRef(
           {children}
         </Element>
         {error ? <span className="text-sm text-rose-400">{error}</span> : null}
-        {!error && hint ? <span className="text-sm text-textSecondary">{hint}</span> : null}
+        {!error && hint ? <span className="text-sm text-textSecondary/90">{hint}</span> : null}
       </label>
     );
   }

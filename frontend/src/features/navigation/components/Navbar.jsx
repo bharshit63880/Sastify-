@@ -1,15 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  FiChevronRight,
-  FiGrid,
   FiHeart,
-  FiLogOut,
   FiMenu,
   FiPackage,
   FiSearch,
-  FiShield,
-  FiShoppingBag,
+  FiShoppingCart,
   FiUser,
   FiX,
 } from "react-icons/fi";
@@ -22,19 +18,11 @@ import { fetchProducts } from "../../products/ProductApi";
 import { selectStorefrontMetrics } from "../../storefront/StorefrontSlice";
 import { selectWishlistItems } from "../../wishlist/WishlistSlice";
 import { RECENT_SEARCH_STORAGE_KEY } from "../../../constants";
-import { Button } from "../../../components/ui/Button";
-import { Container } from "../../../components/ui/Container";
 
-const CountBubble = ({ count, children }) => (
-  <span className="relative inline-flex">
-    {children}
-    {count ? (
-      <span className="absolute -right-2 -top-2 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-white">
-        {count}
-      </span>
-    ) : null}
-  </span>
-);
+const primaryLinks = [
+  { label: "Home", to: "/" },
+  { label: "Catalog", to: "/products" },
+];
 
 const loadRecentSearches = () => {
   try {
@@ -46,18 +34,48 @@ const loadRecentSearches = () => {
 
 const persistRecentSearch = (query) => {
   const normalized = query.trim();
-  if (!normalized) {
-    return;
-  }
-
+  if (!normalized) return;
   const unique = [normalized, ...loadRecentSearches().filter((item) => item !== normalized)].slice(0, 5);
   window.localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(unique));
 };
 
-const primaryLinks = [
-  { label: "Home", to: "/" },
-  { label: "Catalog", to: "/products" },
-];
+const iconButtonClass =
+  "relative inline-flex h-12 min-w-[48px] items-center justify-center rounded-full border border-white/60 bg-white/72 px-4 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(17,17,17,0.08)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:shadow-[0_18px_40px_rgba(200,139,74,0.18)]";
+
+const StatPill = ({ text }) => (
+  <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/70 bg-white/72 px-3.5 py-1.5 text-xs font-medium text-textSecondary shadow-[0_10px_24px_rgba(17,17,17,0.06)] backdrop-blur-xl">
+    <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-accent to-primary" />
+    {text}
+  </span>
+);
+
+const ActionButton = ({ to, onClick, icon, label, count }) => {
+  const inner = (
+    <span className={iconButtonClass}>
+      {icon}
+      {label ? <span className="hidden sm:inline">{label}</span> : null}
+      {count ? (
+        <motion.span
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="absolute -right-1 -top-1 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-button-gradient px-1 text-[10px] font-semibold text-white"
+        >
+          {count}
+        </motion.span>
+      ) : null}
+    </span>
+  );
+
+  if (to) {
+    return <Link to={to}>{inner}</Link>;
+  }
+
+  return (
+    <button type="button" onClick={onClick}>
+      {inner}
+    </button>
+  );
+};
 
 export const Navbar = () => {
   const dispatch = useDispatch();
@@ -71,28 +89,26 @@ export const Navbar = () => {
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const currentQuery = searchParams.get("q");
-    if (currentQuery) {
-      setQuery(currentQuery);
-    }
+    setQuery(currentQuery || "");
     setMenuOpen(false);
-    setSearchOpen(false);
     setAccountOpen(false);
+    setSearchOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 18);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -106,44 +122,29 @@ export const Navbar = () => {
           search: query.trim(),
           pagination: { page: 1, limit: 6 },
         });
-        setSuggestions(response.data);
+        setSuggestions(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         setSuggestions([]);
       }
-    }, 250);
+    }, 220);
 
     return () => clearTimeout(timeoutId);
   }, [query]);
-
-  const recentSearches = loadRecentSearches();
 
   const trustHighlights = useMemo(() => {
     const safeNumber = (value) => Number(value || 0).toLocaleString("en-IN");
     return [
       `${safeNumber(storefrontMetrics.activeProducts)} live products`,
       `${safeNumber(storefrontMetrics.activeCategories)} categories`,
-      `${safeNumber(storefrontMetrics.publishedReviews)} published reviews`,
+      `${safeNumber(storefrontMetrics.publishedReviews)} reviews`,
     ];
-  }, [storefrontMetrics.activeCategories, storefrontMetrics.activeProducts, storefrontMetrics.publishedReviews]);
-
-  const accountLinks = loggedInUser?.isAdmin
-    ? [
-        { label: "Admin dashboard", to: "/admin", icon: <FiGrid /> },
-        { label: "Logout", action: "logout", icon: <FiLogOut /> },
-      ]
-    : [
-        { label: "My account", to: "/account", icon: <FiUser /> },
-        { label: "My orders", to: "/orders", icon: <FiPackage /> },
-        { label: "Logout", action: "logout", icon: <FiLogOut /> },
-      ];
+  }, [storefrontMetrics]);
 
   const handleSearchSubmit = (value = query) => {
     const finalQuery = value.trim();
-    if (!finalQuery) {
-      return;
-    }
-
+    if (!finalQuery) return;
     persistRecentSearch(finalQuery);
+    setSearchOpen(false);
     navigate(`/search?q=${encodeURIComponent(finalQuery)}`);
   };
 
@@ -153,293 +154,240 @@ export const Navbar = () => {
     navigate("/login");
   };
 
+  const recentSearches = loadRecentSearches();
+
   return (
-    <>
-      <header
-        className={[
-          "sticky top-0 z-50 transition duration-300",
-          scrolled ? "border-b border-border bg-background/90 shadow-card backdrop-blur-2xl" : "bg-transparent",
-        ].join(" ")}
+    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6">
+      <motion.div
+        animate={{
+          paddingTop: isScrolled ? 10 : 14,
+          paddingBottom: isScrolled ? 10 : 14,
+        }}
+        transition={{ duration: 0.35 }}
+        className="glass-card noise-overlay overflow-hidden rounded-[30px] border-white/70 px-3 shadow-[0_18px_60px_rgba(17,17,17,0.08)] sm:px-5"
       >
-        <div className="border-b border-border bg-[#fbf8f4]">
-          <Container className="flex flex-col gap-2 py-2.5 text-sm text-textSecondary md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0">
-              {trustHighlights.map((item) => (
-                <span key={item} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5">
-                  <FiShield className="text-primary" />
-                  {item}
-                </span>
-              ))}
-            </div>
-            <p className="hidden md:block">
-              Average rating {Number(storefrontMetrics.averageRating || 0).toFixed(1)}/5 from{" "}
-              {Number(storefrontMetrics.publishedReviews || 0).toLocaleString("en-IN")} customer reviews.
-            </p>
-          </Container>
-        </div>
-
-        <Container className="py-4">
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-5">
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary lg:hidden sm:h-11 sm:w-11"
-            >
-              <FiMenu />
-            </button>
-
-            <Link to="/" className="min-w-0 shrink">
-              <p className="text-xl font-semibold tracking-tight text-textPrimary sm:text-2xl">Sastify</p>
-              <p className="hidden text-[10px] uppercase tracking-[0.22em] text-textSecondary sm:block">Modern marketplace</p>
-            </Link>
-
-            <nav className="hidden items-center gap-2 lg:flex">
-              {primaryLinks.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    [
-                      "rounded-2xl px-4 py-2 text-sm font-medium transition",
-                      isActive ? "bg-white/[0.08] text-textPrimary" : "text-textSecondary hover:bg-white/[0.05] hover:text-textPrimary",
-                    ].join(" ")
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </nav>
-
-            <div className="relative ml-auto hidden max-w-xl flex-1 md:block">
-              <div className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3">
-                <FiSearch className="text-textSecondary" />
-                <input
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.target.value);
-                    setSearchOpen(true);
-                  }}
-                  onFocus={() => setSearchOpen(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      handleSearchSubmit();
-                    }
-                  }}
-                  className="w-full bg-transparent text-sm text-textPrimary outline-none placeholder:text-textSecondary"
-                  placeholder="Search for mobiles, fashion, appliances and more"
-                />
-              </div>
-
-              <AnimatePresence>
-                {searchOpen ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute left-0 right-0 top-[calc(100%+10px)] rounded-3xl border border-border bg-white p-4 shadow-card backdrop-blur-2xl"
-                  >
-                    {query.trim() ? (
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-textSecondary">Suggestions</p>
-                        {suggestions.length ? (
-                          suggestions.map((item) => (
-                            <button
-                              key={item._id}
-                              onClick={() => handleSearchSubmit(item.name || item.title)}
-                              className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition hover:bg-white/[0.05]"
-                              type="button"
-                            >
-                              <div>
-                                <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
-                                <p className="text-xs text-textSecondary">{item.brand?.name || ""} · Rs. {item.price}</p>
-                              </div>
-                              <FiChevronRight className="text-textSecondary" />
-                            </button>
-                          ))
-                        ) : (
-                          <p className="rounded-2xl border border-border bg-[#fbf8f4] px-4 py-3 text-sm text-textSecondary">
-                            No instant matches. Press Enter to view all search results.
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-textSecondary">Recent searches</p>
-                        {recentSearches.length ? (
-                          recentSearches.map((item) => (
-                            <button
-                              key={item}
-                              onClick={() => handleSearchSubmit(item)}
-                              className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.05]"
-                              type="button"
-                            >
-                              <span>{item}</span>
-                              <FiChevronRight className="text-textSecondary" />
-                            </button>
-                          ))
-                        ) : (
-                          <p className="rounded-2xl border border-border bg-[#fbf8f4] px-4 py-3 text-sm text-textSecondary">
-                            Your recent searches will appear here.
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setSearchOpen((prev) => !prev)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary md:hidden sm:h-11 sm:w-11"
-              >
-                <FiSearch />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (loggedInUser) {
-                    setAccountOpen((prev) => !prev);
-                  } else {
-                    navigate("/login");
-                  }
-                }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary sm:h-11 sm:w-11"
-              >
-                <FiUser />
-              </button>
-
-              {!loggedInUser?.isAdmin ? (
-                <>
-                  <Link to={loggedInUser ? "/wishlist" : "/login"} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary sm:h-11 sm:w-11">
-                    <CountBubble count={wishlistItems.length}>
-                      <FiHeart />
-                    </CountBubble>
-                  </Link>
-                  <Link to={loggedInUser ? "/orders" : "/login"} className="hidden h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-textPrimary sm:inline-flex">
-                    <FiPackage />
-                  </Link>
-                </>
-              ) : null}
-
-              <Link to="/cart" className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary sm:h-11 sm:w-11">
-                <CountBubble count={cartItems.length}>
-                  <FiShoppingBag />
-                </CountBubble>
-              </Link>
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {searchOpen ? (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden lg:hidden"
-              >
-                <div className="mt-4 rounded-2xl border border-border bg-white px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <FiSearch className="text-textSecondary" />
-                    <input
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          handleSearchSubmit();
-                        }
-                      }}
-                      className="w-full bg-transparent text-sm text-textPrimary outline-none placeholder:text-textSecondary"
-                      placeholder="Search for products"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-
-          <div className="mt-4 hidden items-center gap-2 overflow-x-auto pb-1 lg:flex">
-            {categories.map((category) => (
-              <Link
-                key={category._id}
-                to={`/category/${category.slug}`}
-                className="whitespace-nowrap rounded-full border border-border bg-white px-4 py-2 text-sm text-textSecondary transition hover:border-primary/30 hover:text-textPrimary"
-              >
-                {category.name}
-              </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 py-2.5 text-xs text-textSecondary">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {trustHighlights.map((item) => (
+              <StatPill key={item} text={item} />
             ))}
           </div>
-        </Container>
+          <p className="hidden md:block">
+            Average rating {Number(storefrontMetrics.averageRating || 0).toFixed(1)}/5 from{" "}
+            {Number(storefrontMetrics.publishedReviews || 0).toLocaleString("en-IN")} reviews
+          </p>
+        </div>
 
-        <AnimatePresence>
-          {accountOpen ? (
+        <div className="flex items-center gap-3 py-4">
+          <button type="button" onClick={() => setMenuOpen(true)} className={`${iconButtonClass} lg:hidden`}>
+            <FiMenu />
+          </button>
+
+          <Link to="/" className="min-w-0 shrink-0">
+            <p className="bg-button-gradient bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-[2rem]">
+              Sastify
+            </p>
+            <p className="hidden text-[10px] uppercase tracking-[0.26em] text-textSecondary sm:block">
+              Future commerce
+            </p>
+          </Link>
+
+          <nav className="hidden items-center gap-2 lg:flex">
+            {primaryLinks.map((item) => (
+              <NavLink key={item.to} to={item.to} className="group relative rounded-full px-5 py-3 text-sm font-medium text-textSecondary transition hover:text-textPrimary">
+                {({ isActive }) => (
+                  <>
+                    <span className={`relative z-[1] transition duration-200 ${isActive ? "text-textPrimary" : ""}`}>{item.label}</span>
+                    <span
+                      className={[
+                        "absolute inset-x-3 bottom-2 h-[2px] origin-center rounded-full bg-gradient-to-r from-accent via-primary to-accent transition duration-300",
+                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                      ].join(" ")}
+                    />
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="relative ml-auto hidden max-w-[620px] flex-1 md:block">
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute right-4 top-[calc(100%-8px)] z-50 w-[240px] rounded-3xl border border-border bg-white p-3 shadow-card backdrop-blur-2xl sm:right-8 lg:right-20"
+              animate={{ scale: searchOpen ? 1.01 : 1 }}
+              className="relative flex items-center gap-3 rounded-full border border-white/70 bg-white/78 px-5 py-3.5 shadow-[0_16px_40px_rgba(17,17,17,0.08)] backdrop-blur-xl"
             >
-              {accountLinks.map((item) =>
-                item.to ? (
-                  <Link
-                    key={item.label}
-                    to={item.to}
-                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.05]"
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </Link>
-                ) : (
-                  <button
-                    key={item.label}
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.05]"
-                    type="button"
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                )
-              )}
+              <FiSearch className="text-base text-textSecondary" />
+              <input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleSearchSubmit();
+                }}
+                className="w-full bg-transparent text-sm text-textPrimary outline-none placeholder:text-textSecondary/80"
+                placeholder="Search for mobiles, fashion, appliances and more"
+              />
             </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </header>
+
+            <AnimatePresence>
+              {searchOpen ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute left-0 right-0 top-[calc(100%+12px)] glass-card p-4"
+                >
+                  {query.trim() ? (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Suggestions</p>
+                      {suggestions.length ? (
+                        suggestions.map((item) => (
+                          <button
+                            key={item._id}
+                            type="button"
+                            onClick={() => handleSearchSubmit(item.name || item.title)}
+                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/70 hover:bg-white/70"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
+                              <p className="text-xs text-textSecondary">
+                                {item.brand?.name || ""} · Rs. {item.price}
+                              </p>
+                            </div>
+                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="rounded-[18px] border border-white/60 bg-white/60 px-4 py-3 text-sm text-textSecondary">
+                          No instant matches. Press Enter to view all search results.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Recent searches</p>
+                      {recentSearches.length ? (
+                        recentSearches.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => handleSearchSubmit(item)}
+                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/70 hover:bg-white/70"
+                          >
+                            <span className="text-sm text-textPrimary">{item}</span>
+                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="rounded-[18px] border border-white/60 bg-white/60 px-4 py-3 text-sm text-textSecondary">
+                          Your recent searches will appear here.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button type="button" onClick={() => setSearchOpen((prev) => !prev)} className={`${iconButtonClass} md:hidden`}>
+              <FiSearch />
+            </button>
+
+            <ActionButton
+              onClick={() => {
+                if (loggedInUser) {
+                  setAccountOpen((prev) => !prev);
+                } else {
+                  navigate("/login");
+                }
+              }}
+              icon={<FiUser />}
+            />
+            {!loggedInUser?.isAdmin ? (
+              <>
+                <ActionButton to={loggedInUser ? "/wishlist" : "/login"} icon={<FiHeart />} count={wishlistItems.length} />
+                <ActionButton to={loggedInUser ? "/orders" : "/login"} icon={<FiPackage />} />
+              </>
+            ) : null}
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+              <ActionButton to="/cart" icon={<FiShoppingCart />} count={cartItems.length} />
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="hidden items-center gap-3 overflow-x-auto pb-4 lg:flex">
+          {categories.slice(0, 10).map((category) => (
+            <Link
+              key={category._id}
+              to={`/category/${category.slug}`}
+              className="shrink-0 rounded-full border border-white/70 bg-white/66 px-4 py-2.5 text-sm text-textSecondary shadow-[0_10px_26px_rgba(17,17,17,0.06)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:text-textPrimary"
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {accountOpen ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+            className="absolute right-5 top-[calc(100%-6px)] z-50 w-[250px] glass-card p-3 sm:right-8 lg:right-12"
+          >
+            {loggedInUser?.isAdmin ? (
+              <>
+                <Link to="/admin" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                  Admin dashboard
+                </Link>
+                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/70">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/account" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                  My account
+                </Link>
+                <Link to="/orders" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                  My orders
+                </Link>
+                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/70">
+                  Logout
+                </button>
+              </>
+            )}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {menuOpen ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm lg:hidden"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-sm lg:hidden">
             <motion.div
               initial={{ x: -32, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -32, opacity: 0 }}
-              className="h-full w-[min(88vw,320px)] border-r border-border bg-background px-5 py-6"
+              className="glass-card h-full w-[min(88vw,340px)] rounded-none rounded-r-[30px] p-5"
             >
               <div className="mb-8 flex items-start justify-between">
                 <div>
-                  <p className="text-xl font-semibold text-textPrimary">Sastify</p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-textSecondary">Navigation</p>
+                  <p className="bg-button-gradient bg-clip-text text-2xl font-black text-transparent">Sastify</p>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-textSecondary">Navigation</p>
                 </div>
-                <button
-                  onClick={() => setMenuOpen(false)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-white text-textPrimary"
-                  type="button"
-                >
+                <button type="button" onClick={() => setMenuOpen(false)} className={iconButtonClass}>
                   <FiX />
                 </button>
               </div>
 
               <div className="space-y-2">
                 {primaryLinks.map((item) => (
-                  <Link key={item.to} to={item.to} className="block rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.05]">
+                  <Link key={item.to} to={item.to} className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
                     {item.label}
                   </Link>
                 ))}
@@ -447,26 +395,16 @@ export const Navbar = () => {
                   <Link
                     key={category._id}
                     to={`/category/${category.slug}`}
-                    className="block rounded-2xl px-4 py-3 text-sm text-textSecondary transition hover:bg-white/[0.05] hover:text-textPrimary"
+                    className="block rounded-[18px] px-4 py-3 text-sm text-textSecondary transition hover:bg-white/70 hover:text-textPrimary"
                   >
                     {category.name}
                   </Link>
                 ))}
               </div>
-
-              <div className="mt-8">
-                <Button
-                  fullWidth
-                  variant="secondary"
-                  to={loggedInUser?.isAdmin ? "/admin" : loggedInUser ? "/orders" : "/login"}
-                >
-                  {loggedInUser?.isAdmin ? "Open admin dashboard" : loggedInUser ? "View my orders" : "Sign in"}
-                </Button>
-              </div>
             </motion.div>
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </>
+    </header>
   );
 };

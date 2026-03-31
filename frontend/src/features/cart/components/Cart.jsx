@@ -76,20 +76,20 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
       <Card
         hover={false}
-        className="flex-1 rounded-[28px] border border-border bg-white p-4 shadow-[0_18px_40px_rgba(17,17,17,0.04)] md:rounded-[32px] md:p-6"
+        className="flex-1 rounded-[32px] bg-white/56 p-4 md:rounded-[34px] md:p-6"
       >
         <div className="space-y-4">
           {items.map((item, index) => (
             <div
               key={item._id}
               className={[
-                "grid gap-4 rounded-[26px] bg-[#faf7f2] p-4 md:grid-cols-[140px_1fr_auto] md:items-center md:p-5",
+                "grid gap-4 rounded-[28px] border border-white/60 bg-white/72 p-4 shadow-[0_12px_30px_rgba(17,17,17,0.06)] md:grid-cols-[140px_1fr_auto] md:items-center md:p-5",
                 index !== items.length - 1 ? "" : "",
               ].join(" ")}
             >
               <Link
                 to={`/products/${item.product.slug || item.product._id}`}
-                className="overflow-hidden rounded-[22px] bg-white p-4"
+                className="overflow-hidden rounded-[22px] border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(246,240,232,0.86))] p-4"
               >
                 <div className="h-32 w-full">
                   <ProductVisual
@@ -129,12 +129,12 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
                 <button
                   type="button"
                   onClick={() => handleRemove(item._id)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#d14d72] transition hover:bg-[#fff1f5]"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/85 text-[#d14d72] shadow-[0_10px_24px_rgba(17,17,17,0.06)] transition hover:-translate-y-0.5 hover:bg-[#fff1f5]"
                 >
                   <FiTrash2 />
                 </button>
 
-                <div className="inline-flex items-center gap-5 rounded-full bg-white px-5 py-3">
+                <div className="inline-flex items-center gap-5 rounded-full border border-white/60 bg-white/85 px-5 py-3 shadow-[0_10px_24px_rgba(17,17,17,0.06)]">
                   <button type="button" onClick={() => handleQuantity(item, item.quantity - 1)} className="text-textPrimary">
                     <FiMinus />
                   </button>
@@ -151,7 +151,7 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
 
       <Card
         hover={false}
-        className="w-full rounded-[28px] border border-border bg-white p-5 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:p-6 md:rounded-[32px] xl:sticky xl:top-28 xl:max-w-[360px]"
+        className="w-full rounded-[32px] bg-white/56 p-5 sm:p-6 md:rounded-[34px] xl:sticky xl:top-28 xl:max-w-[360px]"
       >
         <div className="space-y-5">
           <div>
@@ -161,7 +161,7 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
             </p>
           </div>
 
-          <div className="space-y-3 border-y border-border py-4 text-sm">
+          <div className="space-y-3 rounded-[24px] border border-white/60 bg-white/68 p-4 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-textSecondary">Subtotal</span>
               <span className="font-semibold text-textPrimary">{formatPrice(pricing.subtotal)}</span>
@@ -176,9 +176,9 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-base font-semibold text-textPrimary">Total</span>
-            <span className="text-3xl font-black text-textPrimary">{formatPrice(pricing.total)}</span>
+          <div className="flex items-center justify-between rounded-[24px] bg-button-gradient px-5 py-4 text-white shadow-[0_18px_40px_rgba(17,17,17,0.14)]">
+            <span className="text-base font-semibold text-white">Total</span>
+            <span className="text-3xl font-black text-white">{formatPrice(pricing.total)}</span>
           </div>
 
           {!hideActions ? (

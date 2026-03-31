@@ -7,10 +7,10 @@ import { Navbar } from "../features/navigation/components/Navbar";
 
 export const RootLayout = () => {
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       <ScrollToTop />
       <Navbar />
-      <main className="min-h-[70vh]">
+      <main className="relative min-h-[70vh]">
         <Container>
           <Outlet />
         </Container>

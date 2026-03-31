@@ -162,8 +162,8 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
 );
 
 export const ProductList = ({
-  title = "CASUAL",
-  description = "Explore the catalog in a cleaner, more fashion-led grid with the same product data and flows.",
+  title = "CATALOG",
+  description = "Explore the catalog through a premium grid with calmer spacing, glass filters, and softer motion.",
   baseFilters,
 }) => {
   const brands = useSelector(selectBrands);
@@ -339,17 +339,17 @@ export const ProductList = ({
       <Section className="pt-2">
         <Card
           hover={false}
-          className="rounded-[28px] border border-border bg-white px-5 py-5 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-6 md:rounded-[32px] lg:px-8"
+          className="noise-overlay rounded-[32px] bg-white/56 px-5 py-6 sm:px-6 md:rounded-[36px] lg:px-8"
         >
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-2">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-textSecondary">Category page</p>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-textSecondary">Premium catalog</p>
               <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary sm:text-4xl">{title}</h1>
               <p className="max-w-2xl text-base leading-7 text-textSecondary">{description}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-[#f8f4ee] px-4 py-2 text-sm font-medium text-textPrimary">
+              <span className="rounded-full border border-white/60 bg-white/78 px-4 py-2 text-sm font-medium text-textPrimary shadow-[0_10px_26px_rgba(17,17,17,0.06)]">
                 {totalResults} products
               </span>
               <Button
@@ -366,11 +366,11 @@ export const ProductList = ({
       </Section>
 
       <Section className="pt-4">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-start">
           <div className="hidden w-full max-w-[290px] xl:block">
             <Card
               hover={false}
-              className="sticky top-28 rounded-[28px] border border-border bg-white p-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)]"
+              className="sticky top-28 rounded-[30px] bg-white/56 p-6"
             >
               <FilterPanel
                 filters={filters}
@@ -385,12 +385,12 @@ export const ProductList = ({
           <div className="flex-1 space-y-6">
             <Card
               hover={false}
-              className="rounded-[28px] border border-border bg-white px-4 py-4 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-5 md:px-6"
+              className="rounded-[30px] bg-white/56 px-4 py-4 sm:px-5 md:px-6"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-wrap gap-2">
                   {activeChips.map((chip) => (
-                    <span key={chip.key} className="rounded-full border border-border bg-[#faf7f2] px-4 py-2 text-sm text-textPrimary">
+                    <span key={chip.key} className="rounded-full border border-white/60 bg-white/72 px-4 py-2 text-sm text-textPrimary shadow-[0_8px_22px_rgba(17,17,17,0.05)]">
                       {chip.label}
                     </span>
                   ))}
@@ -423,7 +423,7 @@ export const ProductList = ({
               <LoadingState />
             ) : products.length ? (
               <>
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   {products.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
