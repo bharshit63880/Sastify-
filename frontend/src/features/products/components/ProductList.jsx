@@ -175,7 +175,11 @@ export const ProductList = ({
   const [products, setProducts] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [productFetchStatus, setProductFetchStatus] = useState("idle");
-  const stableBaseFilters = baseFilters || EMPTY_BASE_FILTERS;
+  const baseFiltersKey = JSON.stringify(baseFilters || EMPTY_BASE_FILTERS);
+  const stableBaseFilters = useMemo(
+    () => baseFilters || EMPTY_BASE_FILTERS,
+    [baseFiltersKey]
+  );
   const normalizedBaseCategory = useMemo(
     () => (Array.isArray(stableBaseFilters?.category) ? stableBaseFilters.category : []),
     [stableBaseFilters?.category]
@@ -193,9 +197,9 @@ export const ProductList = ({
 
   useEffect(() => {
     setFilters((prev) => {
-      const sameCategory =
-        prev.category.length === normalizedBaseCategory.length &&
-        prev.category.every((item, index) => item === normalizedBaseCategory[index]);
+        const sameCategory =
+          prev.category.length === normalizedBaseCategory.length &&
+          prev.category.every((item) => normalizedBaseCategory.includes(item));
 
       if (sameCategory) {
         return prev;
@@ -211,6 +215,14 @@ export const ProductList = ({
 
   useEffect(() => {
     let isActive = true;
+    if (filters.priceRange?.[0] > filters.priceRange?.[1]) {
+      setProducts([]);
+      setTotalResults(0);
+      setProductFetchStatus("fulfilled");
+      return () => {
+        isActive = false;
+      };
+    }
 
     setProductFetchStatus("pending");
 
@@ -248,22 +260,16 @@ export const ProductList = ({
     return () => {
       isActive = false;
     };
-  }, [baseCategoryKey, baseSearch, filters, page, sort, stableBaseFilters]);
+  }, [baseCategoryKey, baseSearch, filtersKey, page, sort]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filtersKey, sort, baseSearch, baseCategoryKey]);
 
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
-  const availableBrands = useMemo(() => {
-    const activeBrandIds = new Set(filters.brand);
-
-    products.forEach((product) => {
-      const brandId = product?.brand?._id || product?.brand;
-      if (brandId) {
-        activeBrandIds.add(String(brandId));
-      }
-    });
-
-    return brands.filter((brand) => activeBrandIds.has(String(brand._id)));
-  }, [brands, filters.brand, products]);
+  const availableBrands = brands;
+  const filtersKey = JSON.stringify(filters);
 
   const activeChips = useMemo(() => {
     const chips = [];

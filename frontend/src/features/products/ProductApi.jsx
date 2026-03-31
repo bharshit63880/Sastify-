@@ -29,8 +29,8 @@ export const fetchProducts = async (filters = {}) => {
     appendValues(params, 'category', filters.category);
 
     if (filters.search) params.set('search', filters.search);
-    if (filters.minPrice) params.set('minPrice', filters.minPrice);
-    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
+  if (filters.minPrice !== undefined) params.set('minPrice', filters.minPrice);
+  if (filters.maxPrice !== undefined) params.set('maxPrice', filters.maxPrice);
     if (filters.rating) params.set('rating', filters.rating);
     if (filters.discount) params.set('discount', filters.discount);
     if (filters.inStock !== undefined) params.set('inStock', filters.inStock);
