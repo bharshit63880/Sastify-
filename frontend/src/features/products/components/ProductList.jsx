@@ -178,7 +178,7 @@ export const ProductList = ({
   const baseFiltersKey = JSON.stringify(baseFilters || EMPTY_BASE_FILTERS);
   const stableBaseFilters = useMemo(
     () => baseFilters || EMPTY_BASE_FILTERS,
-    [baseFiltersKey]
+    [baseFilters]
   );
   const normalizedBaseCategory = useMemo(
     () => (Array.isArray(stableBaseFilters?.category) ? stableBaseFilters.category : []),
@@ -195,6 +195,33 @@ export const ProductList = ({
     inStock: false,
   });
   const filtersKey = JSON.stringify(filters);
+  const requestPayload = useMemo(
+    () => ({
+      ...stableBaseFilters,
+      search: baseSearch || undefined,
+      category: filters.category,
+      brand: filters.brand,
+      minPrice: filters.priceRange[0],
+      maxPrice: filters.priceRange[1],
+      rating: filters.rating || undefined,
+      discount: filters.discount || undefined,
+      inStock: filters.inStock || undefined,
+      pagination: { page, limit: ITEMS_PER_PAGE },
+      sort,
+    }),
+    [
+      stableBaseFilters,
+      baseSearch,
+      filters.category,
+      filters.brand,
+      filters.priceRange,
+      filters.rating,
+      filters.discount,
+      filters.inStock,
+      page,
+      sort,
+    ]
+  );
 
   useEffect(() => {
     setFilters((prev) => {
@@ -227,19 +254,7 @@ export const ProductList = ({
 
     setProductFetchStatus("pending");
 
-    fetchProducts({
-      ...stableBaseFilters,
-      search: baseSearch || undefined,
-      category: filters.category,
-      brand: filters.brand,
-      minPrice: filters.priceRange[0],
-      maxPrice: filters.priceRange[1],
-      rating: filters.rating || undefined,
-      discount: filters.discount || undefined,
-      inStock: filters.inStock || undefined,
-      pagination: { page, limit: ITEMS_PER_PAGE },
-      sort,
-    })
+    fetchProducts(requestPayload)
       .then((response) => {
         if (!isActive) {
           return;
@@ -261,7 +276,7 @@ export const ProductList = ({
     return () => {
       isActive = false;
     };
-  }, [baseCategoryKey, baseSearch, filtersKey, page, sort]);
+  }, [requestPayload]);
 
   useEffect(() => {
     setPage(1);

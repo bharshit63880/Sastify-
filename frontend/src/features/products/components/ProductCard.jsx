@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiEye, FiHeart, FiShoppingBag, FiStar } from "react-icons/fi";
+import { FiEye, FiHeart, FiStar } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../components/ui/Button";

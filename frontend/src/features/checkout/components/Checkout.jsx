@@ -9,7 +9,6 @@ import {
   FiMapPin,
   FiPackage,
   FiShield,
-  FiShoppingBag,
   FiSmartphone,
   FiTruck,
 } from "react-icons/fi";
