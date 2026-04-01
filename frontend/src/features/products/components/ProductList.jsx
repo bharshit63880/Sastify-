@@ -67,9 +67,7 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
 
               setFilters((prev) => ({
                 ...prev,
-                category: prev.category.includes(category._id)
-                  ? prev.category.filter((item) => item !== category._id)
-                  : [...prev.category, category._id],
+                category: prev.category.includes(category._id) ? [] : [category._id],
               }));
             }}
           >
@@ -77,28 +75,33 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
           </FilterChip>
         ))}
       </div>
+      <p className="text-xs text-textSecondary">Pick one category to keep the catalog clean and focused.</p>
     </div>
 
     <div className="space-y-4">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Brands</p>
-      <div className="flex flex-wrap gap-2">
-        {brands.map((brand) => (
-          <FilterChip
-            key={brand._id}
-            active={filters.brand.includes(brand._id)}
-            onClick={() =>
-              setFilters((prev) => ({
-                ...prev,
-                brand: prev.brand.includes(brand._id)
-                  ? prev.brand.filter((item) => item !== brand._id)
-                  : [...prev.brand, brand._id],
-              }))
-            }
-          >
-            {brand.name}
-          </FilterChip>
-        ))}
-      </div>
+      {filters.category.length ? (
+        <div className="flex flex-wrap gap-2">
+          {brands.map((brand) => (
+            <FilterChip
+              key={brand._id}
+              active={filters.brand.includes(brand._id)}
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  brand: prev.brand.includes(brand._id)
+                    ? prev.brand.filter((item) => item !== brand._id)
+                    : [...prev.brand, brand._id],
+                }))
+              }
+            >
+              {brand.name}
+            </FilterChip>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-textSecondary">Select a category to reveal matching brands.</p>
+      )}
     </div>
 
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">

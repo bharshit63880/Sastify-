@@ -21,7 +21,7 @@ import { RECENT_SEARCH_STORAGE_KEY } from "../../../constants";
 
 const primaryLinks = [
   { label: "Home", to: "/" },
-  { label: "Catalog", to: "/products" },
+  { label: "Shop", to: "/products" },
 ];
 
 const loadRecentSearches = () => {
@@ -271,7 +271,7 @@ export const Navbar = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
-                  className="absolute left-0 right-0 top-[calc(100%+12px)] glass-card p-4"
+                  className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 glass-card max-h-[420px] overflow-auto p-4"
                 >
                   {searchLoading ? (
                     <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">

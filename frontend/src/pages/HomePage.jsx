@@ -151,12 +151,28 @@ export const HomePage = () => {
       </Section>
 
       <Section className="py-8">
-        <div className="glass-card overflow-hidden rounded-[34px] border border-white/8 px-4 py-4">
-          <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-6">
-            {homeData.brands.map((brand) => (
-              <p key={brand._id} className="text-sm font-semibold uppercase tracking-[0.28em] text-textPrimary/92">
-                {brand.name}
-              </p>
+        <div className="glass-card overflow-hidden rounded-[34px] border border-white/8 px-5 py-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-textSecondary">Top brands</p>
+              <p className="text-lg font-semibold text-textPrimary">Trusted marketplace partners</p>
+            </div>
+            <Button to="/products" variant="ghost" className="rounded-full px-4 text-sm">
+              View all
+            </Button>
+          </div>
+          <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
+            {homeData.brands.slice(0, 12).map((brand) => (
+              <div
+                key={brand._id}
+                className="flex min-w-[160px] items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-textPrimary shadow-[0_10px_28px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+              >
+                {brand.logo ? (
+                  <img src={brand.logo} alt={brand.name} className="h-6 w-auto object-contain" />
+                ) : (
+                  brand.name
+                )}
+              </div>
             ))}
           </div>
         </div>
