@@ -31,6 +31,7 @@ export const ProductCard = ({ product }) => {
   const rating = Number(product.rating || 0);
   const reviewCount = Number(product.reviewCount || 0);
   const stock = Number(product.stock || product.stockQuantity || 0);
+  const showUrgency = stock > 0 && stock <= 5;
   const categoryLabel = product.category?.name || product.categoryName || "Curated pick";
   const productLabel = product.name || product.title;
   const brandLabel = product.brand?.name || product.brandName || "Sastify";
@@ -122,6 +123,11 @@ export const ProductCard = ({ product }) => {
               <span className="inline-flex w-fit rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/76 backdrop-blur-xl">
                 {categoryLabel}
               </span>
+              {showUrgency ? (
+                <span className="inline-flex w-fit rounded-full border border-[#ff8cab]/40 bg-[#2a0f1b]/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff9bb6]">
+                  Only few left
+                </span>
+              ) : null}
             </div>
 
             <button

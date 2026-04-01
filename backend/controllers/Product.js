@@ -56,7 +56,12 @@ const buildPublicProductFilter = (query = {}, isAdminRequest = false) => {
     }
 
     if (query.rating) {
-        filter.rating = { $gte: Number(query.rating) };
+        const ratingValue = Number(query.rating);
+        filter.$or = [
+            ...(filter.$or || []),
+            { rating: { $gte: ratingValue } },
+            { ratingAverage: { $gte: ratingValue } },
+        ];
     }
 
     if (parseBoolean(query.inStock)) {
@@ -71,12 +76,26 @@ const buildPublicProductFilter = (query = {}, isAdminRequest = false) => {
         filter.featured = parseBoolean(query.featured);
     }
 
-    if (query.trending) {
-        filter.trending = parseBoolean(query.trending);
+    if (query.trending || query.isTrending) {
+        const flag = parseBoolean(query.trending ?? query.isTrending);
+        filter.$or = [
+            ...(filter.$or || []),
+            { trending: flag },
+            { isTrending: flag },
+        ];
     }
 
-    if (query.bestseller) {
-        filter.bestseller = parseBoolean(query.bestseller);
+    if (query.bestseller || query.isBestSeller) {
+        const flag = parseBoolean(query.bestseller ?? query.isBestSeller);
+        filter.$or = [
+            ...(filter.$or || []),
+            { bestseller: flag },
+            { isBestSeller: flag },
+        ];
+    }
+
+    if (query.isDealOfDay) {
+        filter.isDealOfDay = parseBoolean(query.isDealOfDay);
     }
 
     if (query.slug) {
@@ -92,8 +111,9 @@ const buildSort = (query = {}) => {
         newest: { createdAt: -1 },
         "price-asc": { price: 1 },
         "price-desc": { price: -1 },
-        rating: { rating: -1, reviewCount: -1 },
+        rating: { ratingAverage: -1, rating: -1, ratingCount: -1 },
         discount: { discountPercent: -1 },
+        sales: { salesCount: -1, createdAt: -1 },
     };
 
     if (query.sort && sortMap[query.sort]) {
@@ -154,8 +174,14 @@ const normalizePayload = (payload = {}) => {
         specs,
         status: payload.status || "active",
         featured: Boolean(payload.featured),
-        trending: Boolean(payload.trending),
-        bestseller: Boolean(payload.bestseller),
+        trending: Boolean(payload.trending ?? payload.isTrending),
+        bestseller: Boolean(payload.bestseller ?? payload.isBestSeller),
+        isTrending: Boolean(payload.isTrending ?? payload.trending),
+        isBestSeller: Boolean(payload.isBestSeller ?? payload.bestseller),
+        isDealOfDay: Boolean(payload.isDealOfDay),
+        salesCount: Number(payload.salesCount || 0),
+        ratingAverage: Number(payload.ratingAverage ?? payload.rating ?? 0),
+        ratingCount: Number(payload.ratingCount ?? payload.reviewCount ?? 0),
     };
 };
 
@@ -171,12 +197,22 @@ const appendReviewSummary = async (product) => {
         },
     ]);
 
-    const stats = reviewStats[0] || { rating: product.rating || 0, reviewCount: product.reviewCount || 0 };
+    const stats = reviewStats[0] || {
+        rating: product.ratingAverage || product.rating || 0,
+        reviewCount: product.ratingCount || product.reviewCount || 0,
+    };
 
-    if (product.rating !== stats.rating || product.reviewCount !== stats.reviewCount) {
+    if (
+        product.rating !== stats.rating ||
+        product.reviewCount !== stats.reviewCount ||
+        product.ratingAverage !== stats.rating ||
+        product.ratingCount !== stats.reviewCount
+    ) {
         await Product.findByIdAndUpdate(product._id, {
             rating: Number((stats.rating || 0).toFixed(1)),
             reviewCount: stats.reviewCount || 0,
+            ratingAverage: Number((stats.rating || 0).toFixed(1)),
+            ratingCount: stats.reviewCount || 0,
         });
     }
 };

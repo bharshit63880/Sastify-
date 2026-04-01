@@ -27,6 +27,10 @@ const reviewSchema = new Schema(
             type: String,
             required: true,
         },
+        images: {
+            type: [String],
+            default: [],
+        },
         status: {
             type: String,
             enum: ["published", "hidden"],

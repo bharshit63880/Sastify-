@@ -10,69 +10,49 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { PageWrapper } from "../components/ui/PageWrapper";
 import { Section } from "../components/ui/Section";
-import { selectBrands } from "../features/brands/BrandSlice";
-import { fetchProducts } from "../features/products/ProductApi";
-import { ProductCard } from "../features/products/components/ProductCard";
+import { fetchStorefrontHome } from "../features/storefront/StorefrontApi";
 import { selectStorefrontMetrics, selectStorefrontTestimonials } from "../features/storefront/StorefrontSlice";
+import { ProductCard } from "../features/products/components/ProductCard";
 
-const sectionConfig = [
-  {
-    key: "newArrivals",
-    title: "NEW ARRIVALS",
-    description: "Fresh drops presented with a cleaner premium retail layout.",
-    filters: { sort: "newest", pagination: { page: 1, limit: 4 } },
+const emptyHome = {
+  banners: [],
+  categories: [],
+  brands: [],
+  sections: {
+    trending: [],
+    bestSellers: [],
+    newArrivals: [],
+    dealsOfDay: [],
   },
-  {
-    key: "topSelling",
-    title: "TOP SELLING",
-    description: "Most-shopped picks that customers keep returning to.",
-    filters: { bestseller: true, pagination: { page: 1, limit: 4 } },
-  },
-];
-
-const styleTiles = [
-  {
-    title: "Casual Layers",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80",
-    to: "/products",
-  },
-  {
-    title: "Structured Formal",
-    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80",
-    to: "/products",
-  },
-  {
-    title: "Evening Drop",
-    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80",
-    to: "/products",
-  },
-  {
-    title: "Active Motion",
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
-    to: "/products",
-  },
-];
+};
 
 export const HomePage = () => {
-  const brands = useSelector(selectBrands);
   const metrics = useSelector(selectStorefrontMetrics);
   const testimonials = useSelector(selectStorefrontTestimonials);
-  const [sections, setSections] = useState({});
+  const [homeData, setHomeData] = useState(emptyHome);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isActive = true;
-
-    Promise.all(sectionConfig.map((section) => fetchProducts(section.filters)))
-      .then((responses) => {
+    fetchStorefrontHome()
+      .then((data) => {
         if (!isActive) return;
-        const nextState = {};
-        responses.forEach((response, index) => {
-          nextState[sectionConfig[index].key] = response.data;
+        setHomeData({
+          banners: data.banners || [],
+          categories: data.categories || [],
+          brands: data.brands || [],
+          sections: {
+            trending: data.sections?.trending || [],
+            bestSellers: data.sections?.bestSellers || [],
+            newArrivals: data.sections?.newArrivals || [],
+            dealsOfDay: data.sections?.dealsOfDay || [],
+          },
         });
-        setSections(nextState);
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!isActive) return;
+        setHomeData(emptyHome);
+      })
       .finally(() => {
         if (isActive) setLoading(false);
       });
@@ -91,29 +71,34 @@ export const HomePage = () => {
     [metrics.activeProducts, metrics.averageRating, metrics.totalOrders]
   );
 
-  const featuredBrands = brands.length ? brands.slice(0, 6).map((brand) => brand.name) : ["Aajanta", "Ambrane", "Bajaj", "Bata India", "Biotique", "Zebronics"];
+  const primaryBanner = homeData.banners[0];
+  const heroTitle = primaryBanner?.title || "Discover the new marketplace experience.";
+  const heroSubtitle =
+    primaryBanner?.subtitle ||
+    "Every section is now powered by real marketplace data: banners, categories, and live product collections.";
 
   return (
     <PageWrapper className="space-y-0 py-6 md:py-8">
       <Section className="pt-4">
-        <Card hover={false} className="noise-overlay overflow-hidden rounded-[36px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 sm:p-6 lg:p-8">
+        <Card
+          hover={false}
+          className="noise-overlay overflow-hidden rounded-[36px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 sm:p-6 lg:p-8"
+        >
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="flex flex-col justify-between gap-8">
               <div className="space-y-6">
                 <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textPrimary shadow-[0_14px_30px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-                  Cinematic commerce experience
+                  Marketplace live
                 </span>
                 <div className="space-y-4">
                   <h1 className="hero-title max-w-3xl bg-[linear-gradient(135deg,#ffffff_10%,#d7e2ff_46%,#c88b4a_98%)] bg-clip-text text-transparent">
-                    DISCOVER PRODUCTS AS IF THEY WERE IN A DIGITAL SHOWROOM.
+                    {heroTitle}
                   </h1>
-                  <p className="max-w-xl text-base leading-8 text-textSecondary">
-                    Dark glass layers, cinematic spacing, and slower premium motion turn the storefront into a focused product presentation without changing the existing shopping flow.
-                  </p>
+                  <p className="max-w-xl text-base leading-8 text-textSecondary">{heroSubtitle}</p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button to="/products" icon={<FiArrowRight />} className="rounded-full px-7">
-                    Shop the catalog
+                  <Button to={primaryBanner?.ctaLink || "/products"} icon={<FiArrowRight />} className="rounded-full px-7">
+                    {primaryBanner?.ctaText || "Shop the marketplace"}
                   </Button>
                   <Button to="/products?sort=newest" variant="secondary" className="rounded-full px-7">
                     Explore new arrivals
@@ -134,29 +119,29 @@ export const HomePage = () => {
             <div className="grid min-h-[420px] gap-4 md:grid-cols-[1fr_0.78fr]">
               <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
                 <img
-                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80"
-                  alt="Fashion hero"
+                  src={primaryBanner?.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80"}
+                  alt={primaryBanner?.title || "Marketplace hero"}
                   className="h-full w-full object-cover transition duration-700 hover:scale-105"
                 />
               </motion.div>
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
                 <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
                   <img
-                    src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"
-                    alt="Style showcase"
+                    src={homeData.banners[1]?.image || primaryBanner?.image || "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"}
+                    alt={homeData.banners[1]?.title || "Marketplace highlight"}
                     className="h-full w-full object-cover transition duration-700 hover:scale-105"
                   />
                 </motion.div>
                 <div className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.94))] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.3)]">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
                     <FiZap />
-                    Story mode
+                    Live collections
                   </span>
                   <p className="mt-5 text-3xl font-black leading-tight tracking-tight">
-                    Soft depth, floating visuals, and product-first storytelling.
+                    Dynamic banners, categories, and product rails are now fully API-driven.
                   </p>
                   <p className="mt-4 text-sm leading-7 text-white/72">
-                    Every module now behaves more like a premium showcase frame than a basic retail block, while keeping the shopping logic familiar.
+                    You can curate hero banners, marketplaces collections, and deals from the admin tools without touching code.
                   </p>
                 </div>
               </div>
@@ -168,12 +153,35 @@ export const HomePage = () => {
       <Section className="py-8">
         <div className="glass-card overflow-hidden rounded-[34px] border border-white/8 px-4 py-4">
           <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-6">
-            {featuredBrands.map((brand) => (
-              <p key={brand} className="text-sm font-semibold uppercase tracking-[0.28em] text-textPrimary/92">
-                {brand}
+            {homeData.brands.map((brand) => (
+              <p key={brand._id} className="text-sm font-semibold uppercase tracking-[0.28em] text-textPrimary/92">
+                {brand.name}
               </p>
             ))}
           </div>
+        </div>
+      </Section>
+
+      <Section>
+        <SectionHeader
+          eyebrow="Shop by category"
+          title="CATEGORIES"
+          description="Browse marketplace categories curated from your CMS-driven catalog."
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {homeData.categories.map((category) => (
+            <Link key={category._id} to={`/category/${category.slug}`} className="group relative overflow-hidden rounded-[26px] border border-white/8 bg-white/[0.04] shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
+              <img
+                src={category.image || "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"}
+                alt={category.name}
+                className="h-48 w-full object-cover transition duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+              <div className="absolute inset-x-5 bottom-5">
+                <p className="text-xl font-semibold text-white">{category.name}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </Section>
 
@@ -182,63 +190,86 @@ export const HomePage = () => {
           <LoadingState />
         </Section>
       ) : (
-        sectionConfig.map((section) => (
-          <Section key={section.key} className="pt-4">
+        <>
+          <Section className="pt-4">
             <SectionHeader
-              eyebrow="Curated rail"
-              title={section.title}
-              description={section.description}
+              eyebrow="Trending now"
+              title="TRENDING PRODUCTS"
+              description="Products flagged as trending by your catalog team."
               action={
-                <Button to="/products" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
+                <Button to="/products?trending=true" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
                   View all
                 </Button>
               }
             />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {(sections[section.key] || []).map((product) => (
+              {homeData.sections.trending.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
           </Section>
-        ))
-      )}
 
-      <Section>
-        <SectionHeader
-          eyebrow="Shop by mood"
-          title="BROWSE BY STYLE"
-          description="Editorial category blocks with stronger contrast, softer motion, and mobile-first spacing."
-        />
-        <div className="grid gap-4 md:grid-cols-2">
-          {styleTiles.map((tile, index) => (
-            <Link key={tile.title} to={tile.to} className="group relative overflow-hidden rounded-[32px] border border-white/8 bg-white/[0.04] shadow-[0_24px_60px_rgba(0,0,0,0.32)]">
-              <img
-                src={tile.image}
-                alt={tile.title}
-                className="h-60 w-full object-cover transition duration-700 group-hover:scale-105 sm:h-72"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-              <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
-                <div>
-                  <span className="inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/80">
-                    0{index + 1}
-                  </span>
-                  <p className="mt-3 text-2xl font-black tracking-tight text-white">{tile.title}</p>
-                </div>
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-white/12 text-white backdrop-blur-xl">
-                  <FiArrowRight />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Section>
+          <Section className="pt-4">
+            <SectionHeader
+              eyebrow="Bestsellers"
+              title="BEST SELLERS"
+              description="High-performing products sorted by sales activity."
+              action={
+                <Button to="/products?sort=sales" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
+                  View all
+                </Button>
+              }
+            />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {homeData.sections.bestSellers.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </Section>
+
+          <Section className="pt-4">
+            <SectionHeader
+              eyebrow="New drops"
+              title="NEW ARRIVALS"
+              description="Latest products added to the marketplace catalog."
+              action={
+                <Button to="/products?sort=newest" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
+                  View all
+                </Button>
+              }
+            />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {homeData.sections.newArrivals.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </Section>
+
+          <Section className="pt-4">
+            <SectionHeader
+              eyebrow="Deals"
+              title="DEALS OF THE DAY"
+              description="Limited-time offers flagged by your admin team."
+              action={
+                <Button to="/products?isDealOfDay=true" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
+                  View all
+                </Button>
+              }
+            />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {homeData.sections.dealsOfDay.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </Section>
+        </>
+      )}
 
       <Section>
         <SectionHeader
           eyebrow="Customer signal"
           title="OUR HAPPY CUSTOMERS"
-          description="Real reviews with slightly more editorial layout and elevated premium contrast."
+          description="Real reviews pulled dynamically from published customer ratings."
         />
         <div className="grid gap-5 lg:grid-cols-3">
           {(testimonials.length

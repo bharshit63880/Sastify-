@@ -15,6 +15,7 @@ const reviewRoutes = require("./routes/Review");
 const wishlistRoutes = require("./routes/Wishlist");
 const paymentRoutes = require("./routes/payment");
 const couponRoutes = require("./routes/Coupon");
+const bannerRoutes = require("./routes/Banner");
 const adminRoutes = require("./routes/Admin");
 const storefrontRoutes = require("./routes/Storefront");
 const { connectToDB } = require("./database/db");
@@ -93,6 +94,7 @@ server.use("/reviews", reviewRoutes);
 server.use("/wishlist", wishlistRoutes);
 server.use("/payments", paymentRoutes);
 server.use("/coupons", couponRoutes);
+server.use("/banners", bannerRoutes);
 server.use("/admin", adminRoutes);
 server.use("/storefront", storefrontRoutes);
 

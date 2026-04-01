@@ -93,6 +93,18 @@ const productSchema = new Schema(
             type: Number,
             default: 0,
         },
+        ratingAverage: {
+            type: Number,
+            default: 0,
+        },
+        ratingCount: {
+            type: Number,
+            default: 0,
+        },
+        salesCount: {
+            type: Number,
+            default: 0,
+        },
         featured: {
             type: Boolean,
             default: false,
@@ -102,6 +114,18 @@ const productSchema = new Schema(
             default: false,
         },
         bestseller: {
+            type: Boolean,
+            default: false,
+        },
+        isTrending: {
+            type: Boolean,
+            default: false,
+        },
+        isBestSeller: {
+            type: Boolean,
+            default: false,
+        },
+        isDealOfDay: {
             type: Boolean,
             default: false,
         },
@@ -193,6 +217,38 @@ productSchema.pre("validate", function syncProductFields(next) {
     } else {
         this.discountPercent = Number(this.discountPercent || this.discountPercentage || computedDiscount);
         this.discountPercentage = this.discountPercent;
+    }
+
+    if (typeof this.ratingAverage !== "number" && typeof this.rating === "number") {
+        this.ratingAverage = this.rating;
+    }
+
+    if (typeof this.rating !== "number" && typeof this.ratingAverage === "number") {
+        this.rating = this.ratingAverage;
+    }
+
+    if (typeof this.ratingCount !== "number" && typeof this.reviewCount === "number") {
+        this.ratingCount = this.reviewCount;
+    }
+
+    if (typeof this.reviewCount !== "number" && typeof this.ratingCount === "number") {
+        this.reviewCount = this.ratingCount;
+    }
+
+    if (typeof this.isTrending !== "boolean" && typeof this.trending === "boolean") {
+        this.isTrending = this.trending;
+    }
+
+    if (typeof this.trending !== "boolean" && typeof this.isTrending === "boolean") {
+        this.trending = this.isTrending;
+    }
+
+    if (typeof this.isBestSeller !== "boolean" && typeof this.bestseller === "boolean") {
+        this.isBestSeller = this.bestseller;
+    }
+
+    if (typeof this.bestseller !== "boolean" && typeof this.isBestSeller === "boolean") {
+        this.bestseller = this.isBestSeller;
     }
 
     if (typeof this.stock !== "number" && typeof this.stockQuantity === "number") {

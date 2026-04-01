@@ -1,3 +1,4 @@
+const Banner = require("../models/Banner");
 const Brand = require("../models/Brand");
 const Category = require("../models/Category");
 const Order = require("../models/Order");
@@ -84,5 +85,67 @@ exports.getOverview = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error fetching storefront overview" });
+    }
+};
+
+exports.getMarketplaceHome = async (req, res) => {
+    try {
+        const limit = Number(req.query.limit || 8);
+        const baseFilter = { isDeleted: false, status: "active" };
+
+        const [
+            banners,
+            categories,
+            brands,
+            trendingProducts,
+            bestSellers,
+            newArrivals,
+            dealsOfDay,
+        ] = await Promise.all([
+            Banner.find({ isActive: true }).sort({ priority: -1, createdAt: -1 }),
+            Category.find({ isActive: true }).sort({ createdAt: -1 }),
+            Brand.find({ isActive: true }).sort({ createdAt: -1 }),
+            Product.find({
+                ...baseFilter,
+                $or: [{ isTrending: true }, { trending: true }],
+            })
+                .populate("brand")
+                .populate("category")
+                .sort({ updatedAt: -1 })
+                .limit(limit),
+            Product.find(baseFilter)
+                .populate("brand")
+                .populate("category")
+                .sort({ salesCount: -1, createdAt: -1 })
+                .limit(limit),
+            Product.find(baseFilter)
+                .populate("brand")
+                .populate("category")
+                .sort({ createdAt: -1 })
+                .limit(limit),
+            Product.find({
+                ...baseFilter,
+                isDealOfDay: true,
+            })
+                .populate("brand")
+                .populate("category")
+                .sort({ updatedAt: -1 })
+                .limit(limit),
+        ]);
+
+        res.status(200).json({
+            banners,
+            categories,
+            brands,
+            sections: {
+                trending: trendingProducts,
+                bestSellers,
+                newArrivals,
+                dealsOfDay,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Error fetching marketplace homepage" });
     }
 };

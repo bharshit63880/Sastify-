@@ -23,6 +23,7 @@ const sortOptions = [
   { label: "Newest", value: "newest" },
   { label: "Best Rated", value: "rating" },
   { label: "Discount", value: "discount" },
+  { label: "Best Sellers", value: "sales" },
 ];
 
 const EMPTY_BASE_FILTERS = Object.freeze({});
