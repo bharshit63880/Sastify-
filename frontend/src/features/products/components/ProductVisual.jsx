@@ -1,8 +1,6 @@
 import React from "react";
 import { cn } from "../../../utils/cn";
 
-const seededPattern = /images\.unsplash\.com/i;
-
 const visualMap = [
   {
     match: ["t shirt", "t-shirt", "tee", "graphic tee", "topwear", "menswear"],
@@ -171,11 +169,7 @@ const getFallbackImage = (product) => {
 export const shouldUseGeneratedVisual = (product) => {
   const image = product?.thumbnail || product?.images?.[0] || "";
 
-  if (!image) {
-    return true;
-  }
-
-  return seededPattern.test(image);
+  return !image;
 };
 
 export const ProductVisual = ({ product, className = "", imageClassName = "", alt }) => {

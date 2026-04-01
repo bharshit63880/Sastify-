@@ -183,7 +183,7 @@ export const ProductDetails = () => {
                       <ProductVisual
                         product={{ ...product, thumbnail: image, images: [image] }}
                         alt={`${product.name || product.title} ${index + 1}`}
-                        imageClassName="h-full w-full object-contain mix-blend-multiply"
+                        imageClassName="h-full w-full object-cover"
                       />
                     </div>
                   </button>
@@ -199,7 +199,7 @@ export const ProductDetails = () => {
                       images: [galleryImages[selectedImage] || product.thumbnail],
                     }}
                     alt={product.name || product.title}
-                    imageClassName="h-full w-full object-contain mix-blend-multiply"
+                    imageClassName="h-full w-full object-cover rounded-[20px]"
                   />
                 </div>
               </div>
