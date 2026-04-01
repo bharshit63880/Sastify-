@@ -293,20 +293,33 @@ export const ProductList = ({
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
   const availableBrands = useMemo(() => {
-    if (!filters.category.length) {
+    if (!products || products.length === 0) {
       return [];
     }
 
-    const activeBrandIds = new Set();
+    const uniqueBrands = new Map();
     products.forEach((product) => {
-      const brandId = product?.brand?._id || product?.brand;
-      if (brandId) {
-        activeBrandIds.add(String(brandId));
+      const brand = product?.brand;
+      if (!brand) return;
+
+      if (typeof brand === "object") {
+        const key = String(brand._id || brand.name || "");
+        if (key) uniqueBrands.set(key, brand);
+        return;
       }
+
+      const key = String(brand);
+      if (key) uniqueBrands.set(key, { _id: brand, name: key });
     });
 
-    return brands.filter((brand) => activeBrandIds.has(String(brand._id)));
-  }, [brands, filters.category, products]);
+    if (brands.length) {
+      return Array.from(uniqueBrands.keys())
+        .map((key) => brands.find((item) => String(item._id) === key || item.name === key) || uniqueBrands.get(key))
+        .filter(Boolean);
+    }
+
+    return Array.from(uniqueBrands.values());
+  }, [brands, products]);
 
   const activeChips = useMemo(() => {
     const chips = [];
