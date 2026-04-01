@@ -82,22 +82,26 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Brands</p>
       {filters.category.length ? (
         <div className="flex flex-wrap gap-2">
-          {brands.map((brand) => (
-            <FilterChip
-              key={brand._id}
-              active={filters.brand.includes(brand._id)}
-              onClick={() =>
-                setFilters((prev) => ({
-                  ...prev,
-                  brand: prev.brand.includes(brand._id)
-                    ? prev.brand.filter((item) => item !== brand._id)
-                    : [...prev.brand, brand._id],
-                }))
-              }
-            >
-              {brand.name}
-            </FilterChip>
-          ))}
+          {availableBrands.length ? (
+            availableBrands.map((brand) => (
+              <FilterChip
+                key={brand._id}
+                active={filters.brand.includes(brand._id)}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    brand: prev.brand.includes(brand._id)
+                      ? prev.brand.filter((item) => item !== brand._id)
+                      : [...prev.brand, brand._id],
+                  }))
+                }
+              >
+                {brand.name}
+              </FilterChip>
+            ))
+          ) : (
+            <p className="text-xs text-textSecondary">No brands found for this category.</p>
+          )}
         </div>
       ) : (
         <p className="text-xs text-textSecondary">Select a category to reveal matching brands.</p>
@@ -288,7 +292,21 @@ export const ProductList = ({
 
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
-  const availableBrands = brands;
+  const availableBrands = useMemo(() => {
+    if (!filters.category.length) {
+      return [];
+    }
+
+    const activeBrandIds = new Set();
+    products.forEach((product) => {
+      const brandId = product?.brand?._id || product?.brand;
+      if (brandId) {
+        activeBrandIds.add(String(brandId));
+      }
+    });
+
+    return brands.filter((brand) => activeBrandIds.has(String(brand._id)));
+  }, [brands, filters.category, products]);
 
   const activeChips = useMemo(() => {
     const chips = [];

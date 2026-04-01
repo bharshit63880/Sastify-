@@ -22,6 +22,7 @@ import { RECENT_SEARCH_STORAGE_KEY } from "../../../constants";
 const primaryLinks = [
   { label: "Home", to: "/" },
   { label: "Shop", to: "/products" },
+  { label: "Deals", to: "/products?isDealOfDay=true" },
 ];
 
 const loadRecentSearches = () => {
@@ -289,11 +290,20 @@ export const Navbar = () => {
                               onClick={() => handleSearchSubmit(item.name || item.title)}
                               className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
                             >
-                              <div>
-                                <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
-                                <p className="text-xs text-textSecondary">
-                                  {item.brand?.name || "Sastify"} · Rs. {item.price}
-                                </p>
+                              <div className="flex items-center gap-3">
+                                <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                                  <img
+                                    src={item.thumbnail || item.images?.[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=200&q=80"}
+                                    alt={item.name || item.title}
+                                    className="h-full w-full object-cover"
+                                  />
+                                </span>
+                                <div>
+                                  <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
+                                  <p className="text-xs text-textSecondary">
+                                    {item.brand?.name || "Sastify"} · Rs. {item.price}
+                                  </p>
+                                </div>
                               </div>
                               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
                             </button>
@@ -314,8 +324,15 @@ export const Navbar = () => {
                                 key={category._id}
                                 to={`/category/${category.slug}`}
                                 onClick={() => setSearchOpen(false)}
-                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
                               >
+                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                                  {category.image ? (
+                                    <img src={category.image} alt={category.name} className="h-full w-full object-cover" />
+                                  ) : (
+                                    <span className="text-[10px] font-semibold">{category.name?.[0]}</span>
+                                  )}
+                                </span>
                                 {category.name}
                               </Link>
                             ))}
@@ -332,8 +349,15 @@ export const Navbar = () => {
                                 key={brand._id}
                                 type="button"
                                 onClick={() => handleSearchSubmit(brand.name)}
-                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
                               >
+                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                                  {brand.logo ? (
+                                    <img src={brand.logo} alt={brand.name} className="h-full w-full object-contain" />
+                                  ) : (
+                                    <span className="text-[10px] font-semibold">{brand.name?.[0]}</span>
+                                  )}
+                                </span>
                                 {brand.name}
                               </button>
                             ))}
@@ -395,8 +419,15 @@ export const Navbar = () => {
                                 key={category._id}
                                 to={`/category/${category.slug}`}
                                 onClick={() => setSearchOpen(false)}
-                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
                               >
+                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+                                  {category.image ? (
+                                    <img src={category.image} alt={category.name} className="h-full w-full object-cover" />
+                                  ) : (
+                                    <span className="text-[10px] font-semibold">{category.name?.[0]}</span>
+                                  )}
+                                </span>
                                 {category.name}
                               </Link>
                             ))}
