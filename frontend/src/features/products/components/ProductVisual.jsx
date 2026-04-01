@@ -156,12 +156,24 @@ const getProductKey = (product) =>
     .join(" ")
     .toLowerCase();
 
+const hashString = (value) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
 const getFallbackImage = (product) => {
   const key = getProductKey(product);
   const matched = visualMap.find((entry) => entry.match.some((term) => key.includes(term)));
+  const query = encodeURIComponent((matched?.match?.[0] || key || "product").replace(/[^a-z0-9 ]/gi, " "));
+  const signature = hashString(key || query) % 200;
 
   return (
     matched?.image ||
+    `https://source.unsplash.com/1200x1500/?${query}&sig=${signature}` ||
     "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&q=80"
   );
 };

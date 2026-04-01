@@ -191,7 +191,7 @@ export const ProductDetails = () => {
               </div>
 
               <div className="order-1 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,40,0.9),rgba(9,13,20,0.88))] p-4 sm:p-5 md:order-2 md:rounded-[28px] md:p-6">
-                <div className="mx-auto aspect-square w-full max-w-2xl">
+                <div className="mx-auto aspect-[4/5] w-full max-w-2xl">
                   <ProductVisual
                     product={{
                       ...product,
@@ -199,7 +199,7 @@ export const ProductDetails = () => {
                       images: [galleryImages[selectedImage] || product.thumbnail],
                     }}
                     alt={product.name || product.title}
-                    imageClassName="h-full w-full object-cover rounded-[20px]"
+                    imageClassName="h-full w-full rounded-[20px] object-cover"
                   />
                 </div>
               </div>
