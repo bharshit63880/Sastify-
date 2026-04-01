@@ -95,12 +95,12 @@ export const Login = () => {
           <Link to="/forgot-password" className="text-textSecondary hover:text-textPrimary">
             Forgot password?
           </Link>
-          <Link to="/signup" className="font-semibold text-primary">
+          <Link to="/signup" className="font-semibold text-accent hover:text-textPrimary">
             Create account
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 text-sm text-textSecondary">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-textSecondary backdrop-blur-xl">
           <p className="font-semibold text-textPrimary">Demo access after seeding</p>
           <p className="mt-2">admin@sastify.com / Admin@123</p>
           <p>riya.sharma@sastify.com / User@1234</p>

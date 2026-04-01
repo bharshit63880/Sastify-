@@ -40,10 +40,10 @@ const persistRecentSearch = (query) => {
 };
 
 const iconButtonClass =
-  "relative inline-flex h-12 min-w-[48px] items-center justify-center rounded-full border border-white/60 bg-white/72 px-4 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(17,17,17,0.08)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:shadow-[0_18px_40px_rgba(200,139,74,0.18)]";
+  "relative inline-flex h-12 min-w-[48px] items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:bg-white/[0.08] hover:shadow-[0_18px_40px_rgba(200,139,74,0.18)]";
 
 const StatPill = ({ text }) => (
-  <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/70 bg-white/72 px-3.5 py-1.5 text-xs font-medium text-textSecondary shadow-[0_10px_24px_rgba(17,17,17,0.06)] backdrop-blur-xl">
+  <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-xs font-medium text-textSecondary shadow-[0_10px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
     <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-accent to-primary" />
     {text}
   </span>
@@ -93,6 +93,7 @@ export const Navbar = () => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -104,7 +105,13 @@ export const Navbar = () => {
   }, [location.pathname, location.search]);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 18);
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setIsScrolled(currentY > 18);
+      setIsHidden(currentY > 140 && currentY > lastY);
+      lastY = currentY;
+    };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -160,13 +167,16 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6">
       <motion.div
         animate={{
+          y: isHidden ? -18 : 0,
+          opacity: isHidden ? 0.92 : 1,
           paddingTop: isScrolled ? 10 : 14,
           paddingBottom: isScrolled ? 10 : 14,
+          scale: isScrolled ? 0.985 : 1,
         }}
         transition={{ duration: 0.35 }}
-        className="glass-card noise-overlay overflow-hidden rounded-[30px] border-white/70 px-3 shadow-[0_18px_60px_rgba(17,17,17,0.08)] sm:px-5"
+        className="glass-card noise-overlay overflow-hidden rounded-[30px] border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.82),rgba(9,13,20,0.78))] px-3 shadow-[0_24px_70px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:px-5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 py-2.5 text-xs text-textSecondary">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 py-2.5 text-xs text-textSecondary">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {trustHighlights.map((item) => (
               <StatPill key={item} text={item} />
@@ -213,7 +223,7 @@ export const Navbar = () => {
           <div className="relative ml-auto hidden max-w-[620px] flex-1 md:block">
             <motion.div
               animate={{ scale: searchOpen ? 1.01 : 1 }}
-              className="relative flex items-center gap-3 rounded-full border border-white/70 bg-white/78 px-5 py-3.5 shadow-[0_16px_40px_rgba(17,17,17,0.08)] backdrop-blur-xl"
+              className="relative flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.05] px-5 py-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
             >
               <FiSearch className="text-base text-textSecondary" />
               <input
@@ -248,7 +258,7 @@ export const Navbar = () => {
                             key={item._id}
                             type="button"
                             onClick={() => handleSearchSubmit(item.name || item.title)}
-                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/70 hover:bg-white/70"
+                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
                           >
                             <div>
                               <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
@@ -260,7 +270,7 @@ export const Navbar = () => {
                           </button>
                         ))
                       ) : (
-                        <p className="rounded-[18px] border border-white/60 bg-white/60 px-4 py-3 text-sm text-textSecondary">
+                        <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
                           No instant matches. Press Enter to view all search results.
                         </p>
                       )}
@@ -274,14 +284,14 @@ export const Navbar = () => {
                             key={item}
                             type="button"
                             onClick={() => handleSearchSubmit(item)}
-                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/70 hover:bg-white/70"
+                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
                           >
                             <span className="text-sm text-textPrimary">{item}</span>
                             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
                           </button>
                         ))
                       ) : (
-                        <p className="rounded-[18px] border border-white/60 bg-white/60 px-4 py-3 text-sm text-textSecondary">
+                        <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
                           Your recent searches will appear here.
                         </p>
                       )}
@@ -324,7 +334,7 @@ export const Navbar = () => {
             <Link
               key={category._id}
               to={`/category/${category.slug}`}
-              className="shrink-0 rounded-full border border-white/70 bg-white/66 px-4 py-2.5 text-sm text-textSecondary shadow-[0_10px_26px_rgba(17,17,17,0.06)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:text-textPrimary"
+              className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-textSecondary shadow-[0_10px_26px_rgba(0,0,0,0.22)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:bg-white/[0.07] hover:text-textPrimary"
             >
               {category.name}
             </Link>
@@ -342,22 +352,22 @@ export const Navbar = () => {
           >
             {loggedInUser?.isAdmin ? (
               <>
-                <Link to="/admin" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                <Link to="/admin" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
                   Admin dashboard
                 </Link>
-                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/70">
+                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.06]">
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/account" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                <Link to="/account" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
                   My account
                 </Link>
-                <Link to="/orders" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                <Link to="/orders" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
                   My orders
                 </Link>
-                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/70">
+                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.06]">
                   Logout
                 </button>
               </>
@@ -373,7 +383,7 @@ export const Navbar = () => {
               initial={{ x: -32, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -32, opacity: 0 }}
-              className="glass-card h-full w-[min(88vw,340px)] rounded-none rounded-r-[30px] p-5"
+              className="glass-card h-full w-[min(88vw,340px)] rounded-none rounded-r-[30px] border-r border-white/8 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(8,12,20,0.96))] p-5"
             >
               <div className="mb-8 flex items-start justify-between">
                 <div>
@@ -387,7 +397,7 @@ export const Navbar = () => {
 
               <div className="space-y-2">
                 {primaryLinks.map((item) => (
-                  <Link key={item.to} to={item.to} className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/70">
+                  <Link key={item.to} to={item.to} className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
                     {item.label}
                   </Link>
                 ))}
@@ -395,7 +405,7 @@ export const Navbar = () => {
                   <Link
                     key={category._id}
                     to={`/category/${category.slug}`}
-                    className="block rounded-[18px] px-4 py-3 text-sm text-textSecondary transition hover:bg-white/70 hover:text-textPrimary"
+                    className="block rounded-[18px] px-4 py-3 text-sm text-textSecondary transition hover:bg-white/[0.06] hover:text-textPrimary"
                   >
                     {category.name}
                   </Link>

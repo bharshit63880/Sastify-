@@ -33,10 +33,10 @@ const FilterChip = ({ active, children, onClick, disabled = false }) => (
     disabled={disabled}
     onClick={onClick}
     className={[
-      "rounded-full border px-4 py-2 text-sm font-medium transition",
+      "rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-xl transition duration-300",
       active
-        ? "border-[#111111] bg-[#111111] text-white"
-        : "border-border bg-white text-textSecondary hover:border-[#111111] hover:text-textPrimary",
+        ? "border-accent/40 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white shadow-[0_14px_32px_rgba(200,139,74,0.14)]"
+        : "border-white/10 bg-white/[0.04] text-textSecondary hover:border-accent/25 hover:bg-white/[0.06] hover:text-textPrimary",
       disabled ? "cursor-not-allowed opacity-40" : "",
     ].join(" ")}
   >
@@ -46,7 +46,7 @@ const FilterChip = ({ active, children, onClick, disabled = false }) => (
 
 const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId }) => (
   <div className="space-y-7">
-    <div className="flex items-center justify-between border-b border-border pb-4">
+    <div className="flex items-center justify-between border-b border-white/8 pb-4">
       <p className="text-lg font-semibold text-textPrimary">Filters</p>
       <FiSliders className="text-textSecondary" />
     </div>
@@ -149,12 +149,12 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
       </div>
     </div>
 
-    <label className="flex items-center gap-3 rounded-[22px] border border-border bg-[#faf7f2] px-4 py-3 text-sm text-textPrimary">
+    <label className="flex items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textPrimary backdrop-blur-xl">
       <input
         type="checkbox"
         checked={filters.inStock}
         onChange={(event) => setFilters((prev) => ({ ...prev, inStock: event.target.checked }))}
-        className="h-4 w-4 rounded border-border accent-black"
+        className="h-4 w-4 rounded border-white/20 accent-accent"
       />
       In stock only
     </label>
@@ -163,7 +163,7 @@ const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId
 
 export const ProductList = ({
   title = "CATALOG",
-  description = "Explore the catalog through a premium grid with calmer spacing, glass filters, and softer motion.",
+  description = "Explore a darker cinematic product grid with glass filters, quieter motion, and stronger product focus.",
   baseFilters,
 }) => {
   const brands = useSelector(selectBrands);
@@ -339,17 +339,17 @@ export const ProductList = ({
       <Section className="pt-2">
         <Card
           hover={false}
-          className="noise-overlay rounded-[32px] bg-white/56 px-5 py-6 sm:px-6 md:rounded-[36px] lg:px-8"
+          className="noise-overlay rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,20,31,0.94),rgba(8,12,20,0.92))] px-5 py-6 sm:px-6 md:rounded-[36px] lg:px-8"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-textSecondary">Premium catalog</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-textSecondary">Digital showroom</p>
               <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary sm:text-4xl">{title}</h1>
               <p className="max-w-2xl text-base leading-7 text-textSecondary">{description}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-white/60 bg-white/78 px-4 py-2 text-sm font-medium text-textPrimary shadow-[0_10px_26px_rgba(17,17,17,0.06)]">
+              <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl">
                 {totalResults} products
               </span>
               <Button
@@ -370,7 +370,7 @@ export const ProductList = ({
           <div className="hidden w-full max-w-[290px] xl:block">
             <Card
               hover={false}
-              className="sticky top-28 rounded-[30px] bg-white/56 p-6"
+              className="sticky top-28 rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.92))] p-6"
             >
               <FilterPanel
                 filters={filters}
@@ -385,12 +385,12 @@ export const ProductList = ({
           <div className="flex-1 space-y-6">
             <Card
               hover={false}
-              className="rounded-[30px] bg-white/56 px-4 py-4 sm:px-5 md:px-6"
+              className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.92))] px-4 py-4 sm:px-5 md:px-6"
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-wrap gap-2">
                   {activeChips.map((chip) => (
-                    <span key={chip.key} className="rounded-full border border-white/60 bg-white/72 px-4 py-2 text-sm text-textPrimary shadow-[0_8px_22px_rgba(17,17,17,0.05)]">
+                    <span key={chip.key} className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-textPrimary shadow-[0_10px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
                       {chip.label}
                     </span>
                   ))}
@@ -398,7 +398,7 @@ export const ProductList = ({
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="rounded-full px-4 py-2 text-sm font-medium text-textSecondary transition hover:text-textPrimary"
+                      className="rounded-full px-4 py-2 text-sm font-medium text-textSecondary transition hover:bg-white/[0.05] hover:text-textPrimary"
                     >
                       Clear all
                     </button>
@@ -444,10 +444,10 @@ export const ProductList = ({
                       type="button"
                       onClick={() => setPage(pageNumber)}
                       className={[
-                        "inline-flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold transition",
+                        "inline-flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold backdrop-blur-xl transition",
                         pageNumber === page
-                          ? "border-[#111111] bg-[#111111] text-white"
-                          : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                          ? "border-accent/40 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
+                          : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                       ].join(" ")}
                     >
                       {pageNumber}
@@ -491,19 +491,19 @@ export const ProductList = ({
               initial={{ x: 32, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 32, opacity: 0 }}
-              className="ml-auto h-full w-full max-w-sm border-l border-border bg-[#f4efe8] p-5"
+              className="ml-auto h-full w-full max-w-sm border-l border-white/10 bg-[linear-gradient(180deg,rgba(9,13,20,0.98),rgba(14,20,31,0.98))] p-5"
             >
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-lg font-semibold text-textPrimary">Filters</p>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-textPrimary backdrop-blur-xl"
                 >
                   <FiX />
                 </button>
               </div>
-              <Card hover={false} className="rounded-[28px] border border-border bg-white p-5">
+              <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.96),rgba(9,13,20,0.94))] p-5">
                 <FilterPanel
                   filters={filters}
                   setFilters={setFilters}

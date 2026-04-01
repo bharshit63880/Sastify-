@@ -96,19 +96,19 @@ export const HomePage = () => {
   return (
     <PageWrapper className="space-y-0 py-6 md:py-8">
       <Section className="pt-4">
-        <Card hover={false} className="noise-overlay overflow-hidden rounded-[36px] bg-white/56 p-4 sm:p-6 lg:p-8">
+        <Card hover={false} className="noise-overlay overflow-hidden rounded-[36px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 sm:p-6 lg:p-8">
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="flex flex-col justify-between gap-8">
               <div className="space-y-6">
-                <span className="inline-flex rounded-full border border-white/70 bg-white/78 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textPrimary shadow-[0_10px_26px_rgba(17,17,17,0.06)]">
-                  Premium commerce, softer motion
+                <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textPrimary shadow-[0_14px_30px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+                  Cinematic commerce experience
                 </span>
                 <div className="space-y-4">
-                  <h1 className="hero-title max-w-3xl">
-                    FIND PRODUCTS THAT FEEL MODERN, CURATED, AND WORTH EXPLORING.
+                  <h1 className="hero-title max-w-3xl bg-[linear-gradient(135deg,#ffffff_10%,#d7e2ff_46%,#c88b4a_98%)] bg-clip-text text-transparent">
+                    DISCOVER PRODUCTS AS IF THEY WERE IN A DIGITAL SHOWROOM.
                   </h1>
                   <p className="max-w-xl text-base leading-8 text-textSecondary">
-                    A lighter glassmorphism storefront with calmer spacing, layered depth, and richer product presentation while preserving the existing ecommerce flow.
+                    Dark glass layers, cinematic spacing, and slower premium motion turn the storefront into a focused product presentation without changing the existing shopping flow.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
@@ -121,9 +121,9 @@ export const HomePage = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 border-t border-black/5 pt-6 sm:grid-cols-3">
+              <div className="grid gap-4 border-t border-white/8 pt-6 sm:grid-cols-3">
                 {heroStats.map((stat) => (
-                  <div key={stat.value} className="rounded-[24px] border border-white/60 bg-white/58 p-4 shadow-[0_12px_30px_rgba(17,17,17,0.05)]">
+                  <div key={stat.value} className="rounded-[24px] border border-white/8 bg-white/[0.05] p-4 shadow-[0_18px_38px_rgba(0,0,0,0.24)] backdrop-blur-xl">
                     <p className="text-3xl font-black tracking-tight text-textPrimary">{stat.label}</p>
                     <p className="mt-2 text-sm text-textSecondary">{stat.value}</p>
                   </div>
@@ -132,7 +132,7 @@ export const HomePage = () => {
             </div>
 
             <div className="grid min-h-[420px] gap-4 md:grid-cols-[1fr_0.78fr]">
-              <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/60 bg-white/70 shadow-[0_18px_44px_rgba(17,17,17,0.08)]">
+              <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
                 <img
                   src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80"
                   alt="Fashion hero"
@@ -140,23 +140,23 @@ export const HomePage = () => {
                 />
               </motion.div>
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-                <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/60 bg-white/70 shadow-[0_18px_44px_rgba(17,17,17,0.08)]">
+                <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
                   <img
                     src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"
                     alt="Style showcase"
                     className="h-full w-full object-cover transition duration-700 hover:scale-105"
                   />
                 </motion.div>
-                <div className="glass-dark rounded-[30px] p-6">
+                <div className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.94))] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.3)]">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
                     <FiZap />
-                    Editorial mode
+                    Story mode
                   </span>
                   <p className="mt-5 text-3xl font-black leading-tight tracking-tight">
-                    Soft glass layers with high-trust product focus.
+                    Soft depth, floating visuals, and product-first storytelling.
                   </p>
                   <p className="mt-4 text-sm leading-7 text-white/72">
-                    The storefront now leans into premium dashboard polish while still behaving like familiar ecommerce.
+                    Every module now behaves more like a premium showcase frame than a basic retail block, while keeping the shopping logic familiar.
                   </p>
                 </div>
               </div>
@@ -166,10 +166,10 @@ export const HomePage = () => {
       </Section>
 
       <Section className="py-8">
-        <div className="glass-card overflow-hidden rounded-[34px] px-4 py-4">
+        <div className="glass-card overflow-hidden rounded-[34px] border border-white/8 px-4 py-4">
           <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-6">
             {featuredBrands.map((brand) => (
-              <p key={brand} className="text-sm font-semibold uppercase tracking-[0.28em] text-textPrimary">
+              <p key={brand} className="text-sm font-semibold uppercase tracking-[0.28em] text-textPrimary/92">
                 {brand}
               </p>
             ))}
@@ -211,7 +211,7 @@ export const HomePage = () => {
         />
         <div className="grid gap-4 md:grid-cols-2">
           {styleTiles.map((tile, index) => (
-            <Link key={tile.title} to={tile.to} className="group relative overflow-hidden rounded-[32px] border border-white/60 bg-white/60 shadow-[0_18px_46px_rgba(17,17,17,0.08)]">
+            <Link key={tile.title} to={tile.to} className="group relative overflow-hidden rounded-[32px] border border-white/8 bg-white/[0.04] shadow-[0_24px_60px_rgba(0,0,0,0.32)]">
               <img
                 src={tile.image}
                 alt={tile.title}
@@ -244,7 +244,7 @@ export const HomePage = () => {
           {(testimonials.length
             ? testimonials.slice(0, 3)
             : [{ _id: "fallback-1", customerName: "Verified Buyer", comment: "Smooth checkout, clean layout, and much easier product browsing.", rating: 5 }]).map((item) => (
-            <Card key={item._id} className="rounded-[30px] p-6">
+            <Card key={item._id} className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.94))] p-6">
               <div className="flex items-center gap-1 text-[#f5b301]">
                 {Array.from({ length: 5 }, (_, index) => (
                   <FiStar key={`${item._id}-${index}`} className={index < Number(item.rating || 5) ? "fill-current" : ""} />
