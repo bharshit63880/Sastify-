@@ -309,11 +309,11 @@ export const Checkout = () => {
     <PageWrapper className="space-y-0 py-6 md:py-8">
       <Card
         hover={false}
-        className="overflow-hidden rounded-[28px] border border-border bg-white px-5 py-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
+        className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] px-5 py-6 shadow-[0_24px_56px_rgba(0,0,0,0.28)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
       >
         <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-border bg-[#faf7f2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-textPrimary">
+            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-textPrimary">
               Checkout
             </span>
             <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary md:text-4xl">
@@ -324,8 +324,8 @@ export const Checkout = () => {
             </p>
             <div className="grid gap-3 sm:grid-cols-3">
               {checkoutHighlights.map((item) => (
-                <div key={item.title} className="rounded-[24px] border border-border bg-[#faf7f2] p-4">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-textPrimary">
+                <div key={item.title} className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-textPrimary">
                     {item.icon}
                   </div>
                   <p className="mt-3 text-sm font-semibold text-textPrimary">{item.title}</p>
@@ -335,9 +335,9 @@ export const Checkout = () => {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-border bg-[#eff7ff] p-5 sm:p-6">
+          <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,40,0.94),rgba(11,16,26,0.94))] p-5 sm:p-6">
             <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#48739a]">Payment information</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#89a8cc]">Payment information</p>
               <div className="grid grid-cols-3 gap-3">
                 {paymentModes.map((mode) => (
                   <button
@@ -350,11 +350,11 @@ export const Checkout = () => {
                     className={[
                       "rounded-[22px] border p-4 text-left transition",
                       paymentMethod === "online" && onlineMode === mode.id
-                        ? "border-[#4aa5e8] bg-white shadow-[0_12px_30px_rgba(74,165,232,0.18)]"
-                        : "border-[#c8dfef] bg-white/80 hover:border-[#8cc4ea]",
+                        ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.18))] shadow-[0_12px_30px_rgba(104,138,255,0.16)]"
+                        : "border-white/10 bg-white/[0.04] hover:border-[#8cc4ea]",
                     ].join(" ")}
                   >
-                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf6ff] text-[#2d7fba]">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-[#8ebaf0]">
                       {mode.icon}
                     </div>
                     <p className="mt-4 text-sm font-semibold text-textPrimary">{mode.title}</p>
@@ -362,33 +362,33 @@ export const Checkout = () => {
                 ))}
               </div>
 
-              <div className="rounded-[24px] border border-[#cfe5f5] bg-white p-4 sm:p-5">
+              <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 sm:p-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[18px] border border-border bg-[#fbfdff] px-4 py-3">
+                  <div className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Email</p>
                     <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.email || "Sign in to continue"}</p>
                   </div>
-                  <div className="rounded-[18px] border border-border bg-[#fbfdff] px-4 py-3">
+                  <div className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Card holder</p>
                     <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.name || "Guest checkout disabled"}</p>
                   </div>
-                  <div className="sm:col-span-2 rounded-[18px] border border-[#9ad0f0] bg-[#f8fdff] px-4 py-4">
+                  <div className="sm:col-span-2 rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#48739a]">Selected payment</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#89a8cc]">Selected payment</p>
                         <p className="mt-2 text-sm font-medium text-textPrimary">
                           {paymentMethod === "online"
                             ? `${paymentModes.find((mode) => mode.id === onlineMode)?.title || "Online payment"} will continue in the secure gateway window`
                             : "Cash on Delivery selected"}
                         </p>
                       </div>
-                      <FiCheckCircle className="shrink-0 text-2xl text-[#2ea86b]" />
+                      <FiCheckCircle className="shrink-0 text-2xl text-[#55d48d]" />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs leading-6 text-[#5a7f9f]">
+              <p className="text-xs leading-6 text-[#7f9bbd]">
                 This section is styled like a premium payment form, but the actual transaction still runs through the configured secure gateway or COD flow.
               </p>
             </div>
@@ -398,7 +398,7 @@ export const Checkout = () => {
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
-          <Card hover={false} className="rounded-[28px] border border-border bg-white p-5 sm:p-6 md:rounded-[32px]">
+          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
             <div className="space-y-4">
               <div>
                 <h2 className="text-2xl font-semibold text-textPrimary">Delivery address</h2>
@@ -411,8 +411,8 @@ export const Checkout = () => {
                     className={[
                       "flex cursor-pointer items-start gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
                       selectedAddressId === address._id
-                        ? "border-primary/30 bg-primary/10 shadow-[0_12px_28px_rgba(99,102,241,0.08)]"
-                        : "border-border bg-[#faf7f2]",
+                        ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))] shadow-[0_12px_28px_rgba(104,138,255,0.12)]"
+                        : "border-white/8 bg-white/[0.04]",
                     ].join(" ")}
                   >
                     <input
@@ -425,9 +425,9 @@ export const Checkout = () => {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-textPrimary">{address.fullName || loggedInUser?.name}</p>
                         {address.isDefault ? (
-                          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-textPrimary">
-                            Default
-                          </span>
+                            <span className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-textPrimary">
+                              Default
+                            </span>
                         ) : null}
                       </div>
                       <p className="text-sm text-textSecondary">
@@ -441,7 +441,7 @@ export const Checkout = () => {
             </div>
           </Card>
 
-          <Card hover={false} className="rounded-[28px] border border-border bg-white p-5 sm:p-6 md:rounded-[32px]">
+          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
             <div className="space-y-6">
               <div>
                 <h2 className="text-2xl font-semibold text-textPrimary">Add new address</h2>
@@ -487,7 +487,7 @@ export const Checkout = () => {
             </div>
           </Card>
 
-          <Card hover={false} className="rounded-[28px] border border-border bg-white p-5 sm:p-6 md:rounded-[32px]">
+          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
             <div className="space-y-4">
               <div>
                 <h2 className="text-2xl font-semibold text-textPrimary">Payment method</h2>
@@ -497,7 +497,7 @@ export const Checkout = () => {
                 <label
                   className={[
                     "flex cursor-pointer items-center gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
-                    paymentMethod === "cod" ? "border-primary/30 bg-primary/10" : "border-border bg-[#faf7f2]",
+                    paymentMethod === "cod" ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))]" : "border-white/8 bg-white/[0.04]",
                   ].join(" ")}
                 >
                   <input type="radio" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="accent-primary" />
@@ -509,7 +509,7 @@ export const Checkout = () => {
                 <label
                   className={[
                     "flex cursor-pointer items-center gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
-                    paymentMethod === "online" ? "border-primary/30 bg-primary/10" : "border-border bg-[#faf7f2]",
+                    paymentMethod === "online" ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))]" : "border-white/8 bg-white/[0.04]",
                   ].join(" ")}
                 >
                   <input type="radio" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} className="accent-primary" />
@@ -538,8 +538,8 @@ export const Checkout = () => {
                       className={[
                         "rounded-[22px] border p-4 text-left transition",
                         onlineMode === mode.id
-                          ? "border-[#111111] bg-[#111111] text-white"
-                          : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                          ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
+                          : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                       ].join(" ")}
                     >
                       <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-inherit">
@@ -559,7 +559,7 @@ export const Checkout = () => {
 
         <Card
           hover={false}
-          className="rounded-[28px] border border-border bg-white p-5 sm:p-6 md:rounded-[32px] xl:sticky xl:top-28 xl:h-fit"
+          className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px] xl:sticky xl:top-28 xl:h-fit"
         >
           <div className="space-y-5">
             <div>
@@ -569,8 +569,8 @@ export const Checkout = () => {
 
             <div className="space-y-3">
               {cartItems.map((item) => (
-                <div key={item._id} className="flex items-start gap-3 rounded-[22px] border border-border bg-[#faf7f2] p-3">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[18px] bg-white p-2">
+                <div key={item._id} className="flex items-start gap-3 rounded-[22px] border border-white/8 bg-white/[0.04] p-3">
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-white/[0.06] p-2">
                     <ProductVisual
                       product={item.product}
                       alt={item.product.name || item.product.title}
@@ -606,7 +606,7 @@ export const Checkout = () => {
               placeholder="Enter coupon"
             />
 
-            <div className="space-y-3 border-y border-border py-4 text-sm">
+            <div className="space-y-3 border-y border-white/8 py-4 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-textSecondary">Subtotal</span>
                 <span className="text-textPrimary">{formatPrice(summary.subtotal)}</span>
@@ -632,9 +632,9 @@ export const Checkout = () => {
               <span className="text-2xl font-semibold text-textPrimary">{formatPrice(summary.total)}</span>
             </div>
 
-            <div className="rounded-[24px] border border-border bg-[#faf7f2] p-4">
+            <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
               <div className="flex items-start gap-3">
-                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-textPrimary">
+                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-textPrimary">
                   <FiShield />
                 </div>
                 <div>
@@ -650,7 +650,7 @@ export const Checkout = () => {
               </div>
             </div>
 
-            {paymentError ? <p className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-600">{paymentError}</p> : null}
+            {paymentError ? <p className="rounded-2xl border border-rose-400/30 bg-rose-950/30 px-4 py-3 text-sm text-rose-200">{paymentError}</p> : null}
 
             <Button
               fullWidth

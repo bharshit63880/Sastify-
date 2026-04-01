@@ -164,7 +164,7 @@ export const ProductDetails = () => {
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <Card
             hover={false}
-            className="rounded-[32px] border border-border bg-white p-4 shadow-[0_18px_40px_rgba(17,17,17,0.04)] md:p-5"
+            className="rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 shadow-[0_24px_56px_rgba(0,0,0,0.28)] md:p-5"
           >
             <div className="grid gap-4 md:grid-cols-[88px_1fr] lg:grid-cols-[100px_1fr]">
               <div className="order-2 grid grid-cols-4 gap-3 md:order-1 md:grid-cols-1">
@@ -176,6 +176,7 @@ export const ProductDetails = () => {
                     className={[
                       "overflow-hidden rounded-[18px] border bg-[#f8f4ee] p-2 transition md:rounded-[20px]",
                       selectedImage === index ? "border-[#111111]" : "border-border hover:border-[#111111]",
+                      selectedImage === index ? "border-accent/40 bg-white/[0.08]" : "border-white/10 bg-white/[0.04] hover:border-accent/25",
                     ].join(" ")}
                   >
                     <div className="h-20 w-full">
@@ -189,7 +190,7 @@ export const ProductDetails = () => {
                 ))}
               </div>
 
-              <div className="order-1 overflow-hidden rounded-[24px] bg-[#f8f4ee] p-4 sm:p-5 md:order-2 md:rounded-[28px] md:p-6">
+              <div className="order-1 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,40,0.9),rgba(9,13,20,0.88))] p-4 sm:p-5 md:order-2 md:rounded-[28px] md:p-6">
                 <div className="mx-auto aspect-square w-full max-w-2xl">
                   <ProductVisual
                     product={{
@@ -207,7 +208,7 @@ export const ProductDetails = () => {
 
           <Card
             hover={false}
-            className="rounded-[28px] border border-border bg-white p-5 shadow-[0_18px_40px_rgba(17,17,17,0.04)] sm:p-6 md:rounded-[32px] md:p-8"
+            className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 shadow-[0_24px_56px_rgba(0,0,0,0.28)] sm:p-6 md:rounded-[32px] md:p-8"
           >
             <div className="space-y-6">
               <div className="space-y-3">
@@ -226,7 +227,7 @@ export const ProductDetails = () => {
                   <span
                     className={[
                       "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em]",
-                      product.stock > 0 ? "bg-[#eef6ef] text-[#297a34]" : "bg-[#fff0f4] text-[#c44b71]",
+                      product.stock > 0 ? "bg-[#13271c] text-[#7dd79b]" : "bg-[#321723] text-[#ff8cab]",
                     ].join(" ")}
                   >
                     {product.stock > 0 ? "In stock" : "Out of stock"}
@@ -234,7 +235,7 @@ export const ProductDetails = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-end gap-3 border-b border-border pb-6">
+              <div className="flex flex-wrap items-end gap-3 border-b border-white/8 pb-6">
                 <p className="text-4xl font-black text-textPrimary">{formatPrice(product.price)}</p>
                 {product.originalPrice > product.price ? (
                   <>
@@ -247,7 +248,7 @@ export const ProductDetails = () => {
               </div>
 
               {product.colors?.length > 0 ? (
-                <div className="space-y-3 border-b border-border pb-6">
+                <div className="space-y-3 border-b border-white/8 pb-6">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Select Colors</p>
                   <div className="flex flex-wrap gap-2">
                     {product.colors.map((color) => (
@@ -258,8 +259,8 @@ export const ProductDetails = () => {
                         className={[
                           "rounded-full border px-4 py-2 text-sm font-medium transition",
                           selectedColor === color
-                            ? "border-[#111111] bg-[#111111] text-white"
-                            : "border-border bg-[#faf7f2] text-textPrimary hover:border-[#111111]",
+                            ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
+                            : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                         ].join(" ")}
                       >
                         {color}
@@ -270,7 +271,7 @@ export const ProductDetails = () => {
               ) : null}
 
               {product.sizes?.length > 0 ? (
-                <div className="space-y-3 border-b border-border pb-6">
+                <div className="space-y-3 border-b border-white/8 pb-6">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Choose Size</p>
                   <div className="flex flex-wrap gap-2">
                     {product.sizes.map((size) => (
@@ -281,8 +282,8 @@ export const ProductDetails = () => {
                         className={[
                           "rounded-full border px-4 py-2 text-sm font-medium transition",
                           selectedSize === size
-                            ? "border-[#111111] bg-[#111111] text-white"
-                            : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                            ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
+                            : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                         ].join(" ")}
                       >
                         {size}
@@ -292,8 +293,8 @@ export const ProductDetails = () => {
                 </div>
               ) : null}
 
-              <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:flex-wrap sm:items-center">
-                <div className="inline-flex items-center gap-5 rounded-full bg-[#f8f4ee] px-5 py-3">
+              <div className="flex flex-col gap-4 border-b border-white/8 pb-6 sm:flex-row sm:flex-wrap sm:items-center">
+                <div className="inline-flex items-center gap-5 rounded-full border border-white/10 bg-white/[0.05] px-5 py-3 backdrop-blur-xl">
                   <button
                     type="button"
                     onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
@@ -323,15 +324,15 @@ export const ProductDetails = () => {
                   className={[
                     "inline-flex h-12 w-12 items-center justify-center rounded-full border transition",
                     isWishlisted
-                      ? "border-[#f0c5d1] bg-[#fff1f5] text-[#d14d72]"
-                      : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                      ? "border-[#5b2136] bg-[#311621] text-[#ff8cab]"
+                      : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                   ].join(" ")}
                 >
                   <FiHeart className={isWishlisted ? "fill-current" : ""} />
                 </button>
                 <button
                   type="button"
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-border bg-white text-textPrimary transition hover:border-[#111111]"
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-textPrimary transition hover:border-accent/25"
                 >
                   <FiShare2 />
                 </button>
@@ -340,8 +341,8 @@ export const ProductDetails = () => {
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   {perks.map((perk) => (
-                    <div key={perk.title} className="rounded-[24px] bg-[#faf7f2] p-4">
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-textPrimary">
+                    <div key={perk.title} className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 backdrop-blur-xl">
+                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-textPrimary">
                         {perk.icon}
                       </div>
                       <p className="mt-3 text-sm font-semibold text-textPrimary">{perk.title}</p>
@@ -350,14 +351,14 @@ export const ProductDetails = () => {
                   ))}
                 </div>
 
-                <div className="rounded-[24px] bg-[#111111] p-5 text-white">
+                <div className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,40,0.94),rgba(9,13,20,0.94))] p-5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.25)]">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/65">Check delivery</p>
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                     <Input
                       value={pincode}
                       onChange={(event) => setPincode(event.target.value)}
                       placeholder="Enter pincode"
-                      className="border-white/10 bg-white text-[#111111] placeholder:text-[#847c73]"
+                      className="border-white/10 bg-white/[0.94] text-[#111111] placeholder:text-[#847c73]"
                     />
                     <Button variant="secondary" className="rounded-full">
                       Apply
@@ -378,7 +379,7 @@ export const ProductDetails = () => {
       <Section className="pt-8">
         <Card
           hover={false}
-          className="rounded-[32px] border border-border bg-white p-6 shadow-[0_18px_40px_rgba(17,17,17,0.04)] md:p-8"
+          className="rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.28)] md:p-8"
         >
           <div className="flex flex-wrap gap-3">
             {tabs.map((tab, index) => (
@@ -389,8 +390,8 @@ export const ProductDetails = () => {
                 className={[
                   "rounded-full border px-5 py-2.5 text-sm font-semibold transition",
                   activeTab === index
-                    ? "border-[#111111] bg-[#111111] text-white"
-                    : "border-border bg-white text-textPrimary hover:border-[#111111]",
+                    ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
+                    : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
                 ].join(" ")}
               >
                 {tab}
@@ -405,7 +406,7 @@ export const ProductDetails = () => {
                 {product.highlights?.length ? (
                   <div className="grid gap-3">
                     {product.highlights.map((item) => (
-                      <div key={item} className="rounded-[22px] bg-[#faf7f2] px-4 py-3 text-sm text-textPrimary">
+                      <div key={item} className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-textPrimary">
                         {item}
                       </div>
                     ))}
@@ -416,18 +417,18 @@ export const ProductDetails = () => {
               <div className="grid gap-3">
                 {(product.specs || []).length ? (
                   product.specs.map((spec) => (
-                    <div key={spec.label} className="rounded-[22px] border border-border bg-[#faf7f2] px-4 py-4">
+                    <div key={spec.label} className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">{spec.label}</p>
                       <p className="mt-2 text-sm font-semibold text-textPrimary">{spec.value}</p>
                     </div>
                   ))
                 ) : (
                   <>
-                    <div className="rounded-[22px] border border-border bg-[#faf7f2] px-4 py-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Seller</p>
                       <p className="mt-2 text-sm font-semibold text-textPrimary">{product.sellerName || "Sastify Retail"}</p>
                     </div>
-                    <div className="rounded-[22px] border border-border bg-[#faf7f2] px-4 py-4">
+                    <div className="rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Warranty</p>
                       <p className="mt-2 text-sm font-semibold text-textPrimary">{product.warranty || "As per seller terms"}</p>
                     </div>
@@ -441,7 +442,7 @@ export const ProductDetails = () => {
             <div className="mt-8 space-y-4">
               {reviews.length ? (
                 reviews.slice(0, 6).map((review) => (
-                  <div key={review._id} className="rounded-[24px] border border-border bg-[#faf7f2] p-5">
+                  <div key={review._id} className="rounded-[24px] border border-white/8 bg-white/[0.04] p-5">
                     <div className="flex flex-wrap items-center gap-3">
                       <p className="text-sm font-semibold text-textPrimary">{review.user?.name || "Verified buyer"}</p>
                       <span className="inline-flex items-center gap-1 text-sm text-[#f5b301]">
