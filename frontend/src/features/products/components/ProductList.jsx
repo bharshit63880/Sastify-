@@ -45,7 +45,7 @@ const FilterChip = ({ active, children, onClick, disabled = false }) => (
   </button>
 );
 
-const FilterPanel = ({ filters, setFilters, categories, brands, lockedCategoryId }) => (
+const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands, lockedCategoryId }) => (
   <div className="space-y-7">
     <div className="flex items-center justify-between border-b border-white/8 pb-4">
       <p className="text-lg font-semibold text-textPrimary">Filters</p>
@@ -398,7 +398,8 @@ export const ProductList = ({
                 filters={filters}
                 setFilters={setFilters}
                 categories={categories}
-                brands={availableBrands}
+                brands={brands}
+                availableBrands={availableBrands}
                 lockedCategoryId={normalizedBaseCategory[0]}
               />
             </Card>
@@ -530,7 +531,8 @@ export const ProductList = ({
                   filters={filters}
                   setFilters={setFilters}
                   categories={categories}
-                  brands={availableBrands}
+                  brands={brands}
+                  availableBrands={availableBrands}
                   lockedCategoryId={normalizedBaseCategory[0]}
                 />
               </Card>
