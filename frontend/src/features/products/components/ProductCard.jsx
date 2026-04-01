@@ -89,13 +89,13 @@ export const ProductCard = ({ product }) => {
         rotateY: springRotateY,
         transformPerspective: 1400,
       }}
-      className="group relative h-full min-h-[540px] overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,22,35,0.98),rgba(9,13,20,0.96))] shadow-[0_30px_80px_rgba(0,0,0,0.42)]"
+      className="group relative h-full min-h-[500px] overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,22,35,0.98),rgba(9,13,20,0.96))] shadow-[0_30px_80px_rgba(0,0,0,0.42)]"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(104,138,255,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(200,139,74,0.18),transparent_28%)] opacity-80" />
       <div className="pointer-events-none absolute inset-[1px] rounded-[27px] border border-white/6" />
       <div className="pointer-events-none absolute inset-x-10 top-0 h-24 rounded-full bg-accent/25 blur-3xl opacity-0 transition duration-500 group-hover:opacity-100" />
 
-      <div className="relative flex h-full flex-col p-[16px]">
+      <div className="relative flex h-full flex-col p-[14px]">
         <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(22,30,44,0.92),rgba(10,15,24,0.88))] p-3">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(200,139,74,0.12),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(104,138,255,0.16),transparent_30%)]" />
           <Link to={`/products/${product.slug || product._id}`} className="relative block">
@@ -152,19 +152,19 @@ export const ProductCard = ({ product }) => {
           </motion.div>
         </div>
 
-        <div className="flex flex-1 flex-col px-1 pb-1 pt-4">
+        <div className="flex flex-1 flex-col px-1 pb-1 pt-3">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-textSecondary">{brandLabel}</p>
             <Link
               to={`/products/${product.slug || product._id}`}
-              className="line-clamp-2 min-h-[3.2rem] text-[1.05rem] font-semibold leading-[1.35] tracking-[-0.03em] text-textPrimary"
+              className="line-clamp-2 min-h-[2.9rem] text-[1rem] font-semibold leading-[1.32] tracking-[-0.03em] text-textPrimary"
             >
               {productLabel}
             </Link>
-            <p className="line-clamp-1 text-sm text-textSecondary">{categoryLabel}</p>
+            <p className="line-clamp-1 text-[13px] text-textSecondary">{categoryLabel}</p>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-4">
+          <div className="mt-2.5 flex items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 text-sm">
               <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-white/82">
                 <FiStar className="fill-current text-[#f5b301]" />
@@ -177,33 +177,33 @@ export const ProductCard = ({ product }) => {
             </p>
           </div>
 
-          <div className="mt-4 flex items-end justify-between gap-3">
+          <div className="mt-3 flex items-end justify-between gap-3">
             <div className="space-y-1">
-              <p className="text-[1.8rem] font-black leading-none tracking-[-0.05em] text-textPrimary">
+              <p className="text-[1.65rem] font-black leading-none tracking-[-0.05em] text-textPrimary">
                 {formatPrice(product.price)}
               </p>
               {product.originalPrice > product.price ? (
-                <p className="text-base text-textSecondary line-through">{formatPrice(product.originalPrice)}</p>
+                <p className="text-sm text-textSecondary line-through">{formatPrice(product.originalPrice)}</p>
               ) : (
-                <p className="text-sm text-textSecondary">Premium curated pricing</p>
+                <p className="text-[13px] text-textSecondary">Premium curated pricing</p>
               )}
             </div>
           </div>
 
-          <div className="mt-auto flex items-center gap-3 pt-4">
+          <div className="mt-auto flex items-center gap-3 pt-3">
             <Button
               fullWidth
               variant={isInCart ? "secondary" : "primary"}
               disabled={stock === 0}
               onClick={handleAddToCart}
               icon={<FiShoppingBag />}
-              className="min-h-[50px] rounded-full px-5 text-[0.98rem]"
+              className="min-h-[46px] rounded-full px-5 text-[0.95rem]"
             >
               {isInCart ? "In cart" : "Add to cart"}
             </Button>
             <Link
               to={`/products/${product.slug || product._id}`}
-              className="inline-flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/92 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/10"
+              className="inline-flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/92 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:bg-white/10"
             >
               <FiEye className="text-lg" />
             </Link>
