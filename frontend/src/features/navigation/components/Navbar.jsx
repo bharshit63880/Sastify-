@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   FiHeart,
@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectLoggedInUser, logoutAsync } from "../../auth/AuthSlice";
 import { selectCartItems } from "../../cart/CartSlice";
 import { selectCategories } from "../../categories/CategoriesSlice";
-import { fetchProducts } from "../../products/ProductApi";
+import { fetchSearchSuggestions } from "../../search/SearchApi";
 import { selectStorefrontMetrics } from "../../storefront/StorefrontSlice";
 import { selectWishlistItems } from "../../wishlist/WishlistSlice";
 import { RECENT_SEARCH_STORAGE_KEY } from "../../../constants";
@@ -88,7 +88,13 @@ export const Navbar = () => {
   const storefrontMetrics = useSelector(selectStorefrontMetrics);
 
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState({
+    products: [],
+    categories: [],
+    brands: [],
+    trending: [],
+  });
+  const [searchLoading, setSearchLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -117,26 +123,40 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      return undefined;
-    }
+  const deferredQuery = useDeferredValue(query);
 
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+
+    let isActive = true;
+    const trimmedQuery = deferredQuery.trim();
     const timeoutId = setTimeout(async () => {
       try {
-        const response = await fetchProducts({
-          search: query.trim(),
-          pagination: { page: 1, limit: 6 },
+        setSearchLoading(true);
+        const response = await fetchSearchSuggestions({
+          query: trimmedQuery,
+          limit: 6,
         });
-        setSuggestions(Array.isArray(response.data) ? response.data : []);
+        if (!isActive) return;
+        setSuggestions({
+          products: response.products || [],
+          categories: response.categories || [],
+          brands: response.brands || [],
+          trending: response.trending || [],
+        });
       } catch (error) {
-        setSuggestions([]);
+        if (!isActive) return;
+        setSuggestions({ products: [], categories: [], brands: [], trending: [] });
+      } finally {
+        if (isActive) setSearchLoading(false);
       }
     }, 220);
 
-    return () => clearTimeout(timeoutId);
-  }, [query]);
+    return () => {
+      isActive = false;
+      clearTimeout(timeoutId);
+    };
+  }, [deferredQuery, searchOpen]);
 
   const trustHighlights = useMemo(() => {
     const safeNumber = (value) => Number(value || 0).toLocaleString("en-IN");
@@ -162,6 +182,10 @@ export const Navbar = () => {
   };
 
   const recentSearches = loadRecentSearches();
+  const suggestionProducts = suggestions.products || [];
+  const suggestionCategories = suggestions.categories || [];
+  const suggestionBrands = suggestions.brands || [];
+  const trendingSearches = suggestions.trending || [];
 
   return (
     <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6">
@@ -249,52 +273,136 @@ export const Navbar = () => {
                   exit={{ opacity: 0, y: 8 }}
                   className="absolute left-0 right-0 top-[calc(100%+12px)] glass-card p-4"
                 >
-                  {query.trim() ? (
-                    <div className="space-y-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Suggestions</p>
-                      {suggestions.length ? (
-                        suggestions.map((item) => (
-                          <button
-                            key={item._id}
-                            type="button"
-                            onClick={() => handleSearchSubmit(item.name || item.title)}
-                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
-                              <p className="text-xs text-textSecondary">
-                                {item.brand?.name || ""} · Rs. {item.price}
-                              </p>
-                            </div>
-                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
-                          </button>
-                        ))
-                      ) : (
-                        <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                          No instant matches. Press Enter to view all search results.
-                        </p>
-                      )}
+                  {searchLoading ? (
+                    <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
+                      Loading search suggestions...
+                    </p>
+                  ) : query.trim() ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Products</p>
+                        {suggestionProducts.length ? (
+                          suggestionProducts.map((item) => (
+                            <button
+                              key={item._id}
+                              type="button"
+                              onClick={() => handleSearchSubmit(item.name || item.title)}
+                              className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
+                            >
+                              <div>
+                                <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
+                                <p className="text-xs text-textSecondary">
+                                  {item.brand?.name || "Sastify"} · Rs. {item.price}
+                                </p>
+                              </div>
+                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
+                            </button>
+                          ))
+                        ) : (
+                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
+                            No instant matches. Press Enter to view all search results.
+                          </p>
+                        )}
+                      </div>
+
+                      {suggestionCategories.length ? (
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Categories</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestionCategories.map((category) => (
+                              <Link
+                                key={category._id}
+                                to={`/category/${category.slug}`}
+                                onClick={() => setSearchOpen(false)}
+                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                              >
+                                {category.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {suggestionBrands.length ? (
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Brands</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestionBrands.map((brand) => (
+                              <button
+                                key={brand._id}
+                                type="button"
+                                onClick={() => handleSearchSubmit(brand.name)}
+                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                              >
+                                {brand.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Recent searches</p>
-                      {recentSearches.length ? (
-                        recentSearches.map((item) => (
-                          <button
-                            key={item}
-                            type="button"
-                            onClick={() => handleSearchSubmit(item)}
-                            className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
-                          >
-                            <span className="text-sm text-textPrimary">{item}</span>
-                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
-                          </button>
-                        ))
-                      ) : (
-                        <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                          Your recent searches will appear here.
-                        </p>
-                      )}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Recent searches</p>
+                        {recentSearches.length ? (
+                          recentSearches.map((item) => (
+                            <button
+                              key={item}
+                              type="button"
+                              onClick={() => handleSearchSubmit(item)}
+                              className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
+                            >
+                              <span className="text-sm text-textPrimary">{item}</span>
+                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
+                            </button>
+                          ))
+                        ) : (
+                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
+                            Your recent searches will appear here.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Trending searches</p>
+                        {trendingSearches.length ? (
+                          <div className="flex flex-wrap gap-2">
+                            {trendingSearches.map((item) => (
+                              <button
+                                key={item}
+                                type="button"
+                                onClick={() => handleSearchSubmit(item)}
+                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                              >
+                                {item}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
+                            No trending searches yet.
+                          </p>
+                        )}
+                      </div>
+
+                      {suggestionCategories.length ? (
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Popular categories</p>
+                          <div className="flex flex-wrap gap-2">
+                            {suggestionCategories.map((category) => (
+                              <Link
+                                key={category._id}
+                                to={`/category/${category.slug}`}
+                                onClick={() => setSearchOpen(false)}
+                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
+                              >
+                                {category.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </motion.div>

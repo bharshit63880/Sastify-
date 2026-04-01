@@ -18,6 +18,7 @@ const couponRoutes = require("./routes/Coupon");
 const bannerRoutes = require("./routes/Banner");
 const adminRoutes = require("./routes/Admin");
 const storefrontRoutes = require("./routes/Storefront");
+const searchRoutes = require("./routes/Search");
 const { connectToDB } = require("./database/db");
 
 const server = express();
@@ -97,6 +98,7 @@ server.use("/coupons", couponRoutes);
 server.use("/banners", bannerRoutes);
 server.use("/admin", adminRoutes);
 server.use("/storefront", storefrontRoutes);
+server.use("/search", searchRoutes);
 
 server.get("/", (req, res) => {
     res.status(200).json({ message: "running" });
