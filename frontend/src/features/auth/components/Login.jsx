@@ -100,11 +100,7 @@ export const Login = () => {
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-textSecondary backdrop-blur-xl">
-          <p className="font-semibold text-textPrimary">Demo access after seeding</p>
-          <p className="mt-2">admin@sastify.com / Admin@123</p>
-          <p>riya.sharma@sastify.com / User@1234</p>
-        </div>
+       
       </div>
     </AuthShell>
   );
