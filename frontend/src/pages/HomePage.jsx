@@ -87,9 +87,7 @@ export const HomePage = () => {
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="flex flex-col justify-between gap-8">
               <div className="space-y-6">
-                <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textPrimary shadow-[0_14px_30px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-                  Marketplace live
-                </span>
+              
                 <div className="space-y-4">
                   <h1 className="hero-title max-w-3xl bg-[linear-gradient(135deg,#ffffff_10%,#d7e2ff_46%,#c88b4a_98%)] bg-clip-text text-transparent">
                     {heroTitle}
@@ -137,12 +135,7 @@ export const HomePage = () => {
                     <FiZap />
                     Live collections
                   </span>
-                  <p className="mt-5 text-3xl font-black leading-tight tracking-tight">
-                    Dynamic banners, categories, and product rails are now fully API-driven.
-                  </p>
-                  <p className="mt-4 text-sm leading-7 text-white/72">
-                    You can curate hero banners, marketplaces collections, and deals from the admin tools without touching code.
-                  </p>
+                 
                 </div>
               </div>
             </div>
