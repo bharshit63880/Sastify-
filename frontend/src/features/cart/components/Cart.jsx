@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { EmptyState } from "../../../components/EmptyState";
 import { Button } from "../../../components/ui/Button";
-import { Card } from "../../../components/ui/Card";
 import { formatPrice } from "../../../utils/currencyFormatter";
 import { DEFAULT_SHIPPING_CHARGE, DEFAULT_TAX_RATE, FREE_SHIPPING_THRESHOLD } from "../../../constants";
 import { selectLoggedInUser } from "../../auth/AuthSlice";
@@ -40,9 +39,7 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
   }, [items]);
 
   const handleQuantity = (item, nextQuantity) => {
-    if (nextQuantity < 1) {
-      return;
-    }
+    if (nextQuantity < 1) return;
 
     if (isGuestCart && !loggedInUser) {
       dispatch(updateGuestCartItem({ id: item._id, quantity: nextQuantity }));
@@ -74,118 +71,110 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
 
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-      <Card
-        hover={false}
-        className="flex-1 rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 md:rounded-[34px] md:p-6"
-      >
-        <div className="space-y-4">
-          {items.map((item, index) => (
-            <div
-              key={item._id}
-              className={[
-                "grid gap-4 rounded-[28px] border border-white/10 bg-white/[0.05] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.24)] backdrop-blur-xl md:grid-cols-[140px_1fr_auto] md:items-center md:p-5",
-                index !== items.length - 1 ? "" : "",
-              ].join(" ")}
+      <div className="flex-1 space-y-4 rounded-[32px] border border-border bg-white p-4 shadow-card md:p-6">
+        {items.map((item) => (
+          <div
+            key={item._id}
+            className="grid gap-4 rounded-[26px] border border-border bg-surface p-4 md:grid-cols-[120px_1fr_auto] md:items-center"
+          >
+            <Link
+              to={`/products/${item.product.slug || item.product._id}`}
+              className="overflow-hidden rounded-[22px] border border-border bg-white"
             >
-              <Link
-                to={`/products/${item.product.slug || item.product._id}`}
-                className="overflow-hidden rounded-[22px] border border-white/10 bg-[linear-gradient(180deg,rgba(18,26,39,0.94),rgba(9,13,20,0.92))] p-4"
-              >
-                <div className="h-32 w-full">
-                  <ProductVisual
-                    product={item.product}
-                    alt={item.product.name || item.product.title}
-                    imageClassName="h-full w-full object-contain mix-blend-multiply"
-                  />
-                </div>
-              </Link>
+              <div className="h-28 w-full">
+                <ProductVisual
+                  product={item.product}
+                  alt={item.product.name || item.product.title}
+                  imageClassName="h-full w-full object-cover"
+                />
+              </div>
+            </Link>
 
-                <div className="min-w-0 space-y-3">
-                  <div className="space-y-1">
-                    <Link
-                      to={`/products/${item.product.slug || item.product._id}`}
-                      className="line-clamp-2 text-lg font-semibold text-textPrimary transition hover:text-[#444444]"
-                    >
-                      {item.product.name || item.product.title}
-                    </Link>
-                  <p className="text-sm text-textSecondary">
-                    {item.product.brand?.name || item.product.brandName || "Shopco"}
-                  </p>
-                  <div className="flex flex-wrap gap-4 text-sm text-textSecondary">
-                    {item.color ? <span>Color: {item.color}</span> : null}
-                    {item.size ? <span>Size: {item.size}</span> : null}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-2xl font-black text-textPrimary">{formatPrice(item.product.price)}</p>
-                  {item.product.originalPrice > item.product.price ? (
-                    <p className="text-sm text-textSecondary line-through">{formatPrice(item.product.originalPrice)}</p>
-                  ) : null}
+            <div className="min-w-0 space-y-3">
+              <div className="space-y-1">
+                <Link
+                  to={`/products/${item.product.slug || item.product._id}`}
+                  className="line-clamp-2 text-lg font-semibold tracking-tight text-textPrimary"
+                >
+                  {item.product.name || item.product.title}
+                </Link>
+                <p className="text-sm text-textSecondary">
+                  {item.product.brand?.name || item.product.brandName || "Sastify"}
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm text-textSecondary">
+                  {item.color ? <span>Color: {item.color}</span> : null}
+                  {item.size ? <span>Size: {item.size}</span> : null}
                 </div>
               </div>
 
-              <div className="flex flex-row items-center justify-between gap-4 md:flex-col md:items-end">
-                <button
-                  type="button"
-                  onClick={() => handleRemove(item._id)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-[#ff6c94] shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:bg-[#3b1320]"
-                >
-                  <FiTrash2 />
-                </button>
-
-                <div className="inline-flex items-center gap-5 rounded-full border border-white/10 bg-white/[0.05] px-5 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-                  <button type="button" onClick={() => handleQuantity(item, item.quantity - 1)} className="text-textPrimary">
-                    <FiMinus />
-                  </button>
-                  <span className="min-w-[16px] text-center text-sm font-semibold text-textPrimary">{item.quantity}</span>
-                  <button type="button" onClick={() => handleQuantity(item, item.quantity + 1)} className="text-textPrimary">
-                    <FiPlus />
-                  </button>
-                </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-2xl font-semibold tracking-[-0.04em] text-textPrimary">
+                  {formatPrice(item.product.price)}
+                </p>
+                {item.product.originalPrice > item.product.price ? (
+                  <p className="text-sm text-textSecondary line-through">
+                    {formatPrice(item.product.originalPrice)}
+                  </p>
+                ) : null}
               </div>
             </div>
-          ))}
-        </div>
-      </Card>
 
-      <Card
-        hover={false}
-        className="w-full rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[34px] xl:sticky xl:top-28 xl:max-w-[360px]"
-      >
+            <div className="flex flex-row items-center justify-between gap-4 md:flex-col md:items-end">
+              <button
+                type="button"
+                onClick={() => handleRemove(item._id)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-[#c74d6f] transition hover:-translate-y-0.5"
+              >
+                <FiTrash2 />
+              </button>
+
+              <div className="inline-flex items-center gap-5 rounded-full border border-border bg-white px-5 py-3">
+                <button type="button" onClick={() => handleQuantity(item, item.quantity - 1)} className="text-textPrimary">
+                  <FiMinus />
+                </button>
+                <span className="min-w-[16px] text-center text-sm font-semibold text-textPrimary">{item.quantity}</span>
+                <button type="button" onClick={() => handleQuantity(item, item.quantity + 1)} className="text-textPrimary">
+                  <FiPlus />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="w-full rounded-[32px] border border-border bg-white p-6 shadow-card xl:sticky xl:top-28 xl:max-w-[360px]">
         <div className="space-y-5">
           <div>
-            <h2 className="text-2xl font-black uppercase tracking-tight text-textPrimary">Order Summary</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-textPrimary">Order summary</h2>
             <p className="mt-2 text-sm leading-6 text-textSecondary">
-              Final totals, shipping changes, and coupon adjustments are still validated on the server during checkout.
+              Review your totals before moving to checkout.
             </p>
           </div>
 
-          <div className="space-y-3 rounded-[24px] border border-white/10 bg-white/[0.05] p-4 text-sm shadow-[0_12px_28px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+          <div className="space-y-3 rounded-[24px] border border-border bg-surface p-4 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-textSecondary">Subtotal</span>
               <span className="font-semibold text-textPrimary">{formatPrice(pricing.subtotal)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-textSecondary">Shipping Fee</span>
+              <span className="text-textSecondary">Shipping</span>
               <span className="font-semibold text-textPrimary">{pricing.shipping ? formatPrice(pricing.shipping) : "Free"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-textSecondary">Estimated Tax</span>
+              <span className="text-textSecondary">Estimated tax</span>
               <span className="font-semibold text-textPrimary">{formatPrice(pricing.tax)}</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(200,139,74,0.9),rgba(104,138,255,0.88))] px-5 py-4 text-white shadow-[0_18px_40px_rgba(0,0,0,0.28)]">
-            <span className="text-base font-semibold text-white">Total</span>
-            <span className="text-3xl font-black text-white">{formatPrice(pricing.total)}</span>
+          <div className="flex items-center justify-between rounded-[24px] bg-primary px-5 py-4 text-white">
+            <span className="text-base font-semibold">Total</span>
+            <span className="text-3xl font-semibold tracking-[-0.04em]">{formatPrice(pricing.total)}</span>
           </div>
 
           {!hideActions ? (
             <div className="space-y-3">
               <Button
                 fullWidth
-                className="rounded-full"
                 onClick={() => {
                   if (!loggedInUser) {
                     navigate("/login", { state: { from: "/checkout" } });
@@ -195,12 +184,12 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
                   navigate("/checkout");
                 }}
               >
-                Go to Checkout
+                Checkout
               </Button>
 
               {!checkoutMode ? (
-                <Button fullWidth variant="secondary" to="/products" className="rounded-full">
-                  Continue Shopping
+                <Button fullWidth variant="secondary" to="/products">
+                  Continue shopping
                 </Button>
               ) : null}
 
@@ -208,7 +197,7 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
                 <button
                   type="button"
                   onClick={() => dispatch(resetCartByUserIdAsync())}
-                  className="w-full rounded-full px-4 py-3 text-sm font-semibold text-textSecondary transition hover:text-textPrimary"
+                  className="w-full rounded-full px-4 py-3 text-sm font-medium text-textSecondary transition hover:bg-surface hover:text-textPrimary"
                 >
                   Clear cart
                 </button>
@@ -216,7 +205,7 @@ export const Cart = ({ checkoutMode = false, hideActions = false }) => {
             </div>
           ) : null}
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

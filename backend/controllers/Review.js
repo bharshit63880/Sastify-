@@ -1,5 +1,15 @@
 const Product = require("../models/Product");
 const Review = require("../models/Review");
+const mongoose = require("mongoose");
+
+const resolveProductId = async (productIdentifier) => {
+    if (mongoose.Types.ObjectId.isValid(productIdentifier)) {
+        return productIdentifier;
+    }
+
+    const product = await Product.findOne({ slug: productIdentifier }).select("_id");
+    return product?._id || null;
+};
 
 const syncProductReviewSummary = async (productId) => {
     const stats = await Review.aggregate([
@@ -41,9 +51,15 @@ exports.getByProductId = async (req, res) => {
         const page = Number(req.query.page || 1);
         const limit = Number(req.query.limit || 20);
         const skip = (page - 1) * limit;
+        const productId = await resolveProductId(req.params.id);
 
-        const totalDocs = await Review.countDocuments({ product: req.params.id, status: "published" });
-        const result = await Review.find({ product: req.params.id, status: "published" })
+        if (!productId) {
+            res.set("X-Total-Count", 0);
+            return res.status(200).json([]);
+        }
+
+        const totalDocs = await Review.countDocuments({ product: productId, status: "published" });
+        const result = await Review.find({ product: productId, status: "published" })
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 })

@@ -71,6 +71,10 @@ export const resetPassword=async(cred)=>{
 }
 export const checkAuth=async(cred)=>{
     try {
+        if (!getStoredAuthToken()) {
+            return null
+        }
+
         const res=await axiosi.get("auth/check-auth")
         return res.data
     } catch (error) {

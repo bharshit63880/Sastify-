@@ -9,10 +9,25 @@ const categorySchema = new Schema(
             required: true,
             trim: true,
         },
+        parentId: {
+            type: Schema.Types.ObjectId,
+            ref: "Category",
+            default: null,
+        },
         slug: {
             type: String,
             unique: true,
             trim: true,
+        },
+        path: {
+            type: String,
+            unique: true,
+            trim: true,
+        },
+        level: {
+            type: Number,
+            default: 0,
+            min: 0,
         },
         description: {
             type: String,
@@ -33,6 +48,10 @@ const categorySchema = new Schema(
 categorySchema.pre("validate", function buildSlug(next) {
     if (!this.slug && this.name) {
         this.slug = slugify(this.name);
+    }
+
+    if (!this.path && this.slug) {
+        this.path = this.slug;
     }
 
     next();

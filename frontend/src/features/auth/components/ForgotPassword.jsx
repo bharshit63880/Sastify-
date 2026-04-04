@@ -61,26 +61,14 @@ export const ForgotPassword = () => {
   return (
     <AuthShell
       eyebrow="Password recovery"
-      title="Reset access without leaving your secure account flow."
-      description="We will send a password reset link to your registered email so you can continue with checkout, tracking, and saved preferences."
-      highlights={[
-        "Secure email-first account recovery",
-        "No backend business logic changes to the reset flow",
-        "You can return here any time if the link expires",
-      ]}
+      title={isSuccess ? "Check your inbox" : "Reset your password"}
+      description={
+        isSuccess
+          ? "We sent a reset link to your registered email."
+          : "Enter your email and we’ll send you a secure reset link."
+      }
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-tight text-textPrimary">
-            {isSuccess ? "Email has been sent" : "Forgot your password?"}
-          </h2>
-          <p className="text-sm text-textSecondary">
-            {isSuccess
-              ? "Please check your inbox and click the link to reset your password."
-              : "Enter your registered email below to receive a password reset link."}
-          </p>
-        </div>
-
         {!isSuccess ? (
           <form onSubmit={handleSubmit(handleForgotPassword)} className="space-y-4">
             <Input

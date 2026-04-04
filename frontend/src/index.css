@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
@@ -20,10 +20,9 @@
   body {
     @apply min-h-screen overflow-x-hidden bg-background font-sans text-textPrimary antialiased;
     background:
-      radial-gradient(circle at 15% 15%, rgba(32, 57, 94, 0.38), transparent 22%),
-      radial-gradient(circle at 85% 18%, rgba(200, 139, 74, 0.12), transparent 18%),
-      radial-gradient(circle at 50% 100%, rgba(18, 28, 44, 0.9), transparent 35%),
-      linear-gradient(180deg, #070b12 0%, #090d14 45%, #0b111b 100%);
+      radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.92), transparent 28%),
+      radial-gradient(circle at 84% 16%, rgba(160, 124, 83, 0.08), transparent 18%),
+      linear-gradient(180deg, #faf7f2 0%, #f6f2eb 52%, #f2ece4 100%);
   }
 
   body::before,
@@ -37,19 +36,20 @@
 
   body::before {
     background:
-      radial-gradient(circle at 8% 16%, rgba(45, 71, 114, 0.32), transparent 18%),
-      radial-gradient(circle at 86% 20%, rgba(200, 139, 74, 0.12), transparent 20%),
-      radial-gradient(circle at 72% 72%, rgba(28, 42, 70, 0.3), transparent 22%);
-    filter: blur(80px);
-    opacity: 0.9;
+      radial-gradient(circle at 8% 14%, rgba(255, 255, 255, 0.88), transparent 20%),
+      radial-gradient(circle at 84% 18%, rgba(160, 124, 83, 0.09), transparent 20%),
+      radial-gradient(circle at 58% 88%, rgba(226, 216, 201, 0.7), transparent 24%);
+    filter: blur(70px);
+    opacity: 0.95;
   }
 
   body::after {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 72px 72px, 72px 72px;
-    mask-image: radial-gradient(circle at center, black 40%, transparent 92%);
+      linear-gradient(rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px);
+    background-size: 80px 80px, 80px 80px;
+    mask-image: radial-gradient(circle at center, black 38%, transparent 88%);
+    opacity: 0.22;
   }
 
   a {
@@ -64,8 +64,8 @@
   }
 
   ::selection {
-    background: rgba(200, 139, 74, 0.25);
-    color: #f7f9fc;
+    background: rgba(160, 124, 83, 0.18);
+    color: #111111;
   }
 
   ::-webkit-scrollbar {
@@ -74,18 +74,18 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(17, 17, 17, 0.04);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(200, 139, 74, 0.7), rgba(73, 97, 145, 0.7));
+    background: linear-gradient(180deg, rgba(17, 17, 17, 0.24), rgba(160, 124, 83, 0.34));
     border-radius: 999px;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply rounded-[28px] border border-white/10 bg-white/[0.05] shadow-glass backdrop-blur-2xl;
+    @apply rounded-[28px] border border-border bg-white/90 shadow-glass backdrop-blur-xl;
   }
 
   .surface-panel {
@@ -93,19 +93,19 @@
   }
 
   .surface-elevated {
-    @apply rounded-[32px] border border-white/12 bg-white/[0.07] shadow-premium backdrop-blur-2xl;
+    @apply rounded-[32px] border border-border bg-white shadow-premium;
   }
 
   .section-title {
-    @apply text-2xl font-semibold tracking-tight text-textPrimary md:text-3xl;
+    @apply text-3xl font-semibold tracking-tight text-textPrimary md:text-4xl;
   }
 
   .hero-title {
-    @apply text-4xl font-black leading-[0.9] tracking-tight text-textPrimary sm:text-5xl xl:text-6xl;
+    @apply text-4xl font-semibold leading-[0.95] tracking-[-0.04em] text-textPrimary sm:text-5xl xl:text-6xl;
   }
 
   .body-copy {
-    @apply text-base leading-8 text-textSecondary;
+    @apply text-base leading-7 text-textSecondary;
   }
 
   .small-copy {
@@ -113,11 +113,11 @@
   }
 
   .input-base {
-    @apply w-full rounded-[22px] border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-textPrimary outline-none transition duration-200 placeholder:text-textSecondary/70 focus:border-accent/40 focus:bg-white/[0.06] focus:ring-4 focus:ring-accent/10;
+    @apply w-full rounded-2xl border border-border bg-white px-4 py-3.5 text-sm text-textPrimary outline-none transition duration-200 placeholder:text-textSecondary/70 focus:border-primary/20 focus:ring-4 focus:ring-primary/5;
   }
 
   .glow-ring {
-    box-shadow: 0 0 0 1px rgba(200, 139, 74, 0.14), 0 28px 60px rgba(200, 139, 74, 0.12);
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.05), 0 20px 50px rgba(17, 17, 17, 0.08);
   }
 
   .noise-overlay {
@@ -129,22 +129,21 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.08;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.55) 0.5px, transparent 0.5px);
-    background-size: 8px 8px;
-    mix-blend-mode: overlay;
+    opacity: 0.03;
+    background-image: radial-gradient(rgba(17, 17, 17, 0.7) 0.5px, transparent 0.5px);
+    background-size: 10px 10px;
   }
 }
 
 .Toastify__toast {
-  border-radius: 22px;
-  background: rgba(14, 20, 32, 0.86);
-  color: #f7f9fc;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111111;
+  border: 1px solid rgba(17, 17, 17, 0.06);
+  box-shadow: 0 18px 40px rgba(17, 17, 17, 0.12);
+  backdrop-filter: blur(16px);
 }
 
 .Toastify__progress-bar {
-  background: linear-gradient(90deg, #c88b4a, #496191);
+  background: linear-gradient(90deg, #111111, #a07c53);
 }

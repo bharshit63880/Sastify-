@@ -75,6 +75,8 @@ function App() {
           <Route path='/products' element={<ProductsPage/>}/>
           <Route path='/search' element={<SearchResultsPage/>}/>
           <Route path='/category/:slug' element={<CategoryPage/>}/>
+          <Route path='/category/:parent/:child' element={<CategoryPage/>}/>
+          <Route path='/category/:parent/:child/:grandchild' element={<CategoryPage/>}/>
           <Route path='/products/:id' element={<ProductDetailsPage/>}/>
           <Route path='/cart' element={<CartPage/>}/>
           <Route path='/checkout' element={<Protected><CheckoutPage/></Protected>}/>

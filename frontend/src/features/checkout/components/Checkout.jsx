@@ -2,19 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  FiCheckCircle,
-  FiClock,
-  FiCreditCard,
-  FiMapPin,
-  FiPackage,
-  FiShield,
-  FiSmartphone,
-  FiTruck,
-} from "react-icons/fi";
+import { FiCheckCircle, FiCreditCard, FiMapPin, FiPackage, FiPlus } from "react-icons/fi";
 import { EmptyState } from "../../../components/EmptyState";
 import { Button } from "../../../components/ui/Button";
-import { Card } from "../../../components/ui/Card";
 import { Input } from "../../../components/ui/Input";
 import { PageWrapper } from "../../../components/ui/PageWrapper";
 import { formatPrice } from "../../../utils/currencyFormatter";
@@ -45,6 +35,8 @@ const loadRazorpayScript = () =>
     document.body.appendChild(script);
   });
 
+const sectionClassName = "rounded-[30px] border border-border bg-white p-5 shadow-card sm:p-6";
+
 export const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -60,6 +52,7 @@ export const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [onlineMode, setOnlineMode] = useState("upi");
   const [couponCode, setCouponCode] = useState("");
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const [paymentConfig, setPaymentConfig] = useState({
     enabled: false,
     provider: "mock",
@@ -91,6 +84,12 @@ export const Checkout = () => {
       setSelectedAddressId(defaultAddress._id);
     }
   }, [addresses, selectedAddressId]);
+
+  useEffect(() => {
+    if (!addresses.length) {
+      setShowAddressForm(true);
+    }
+  }, [addresses.length]);
 
   useEffect(() => {
     getPaymentConfig()
@@ -146,52 +145,38 @@ export const Checkout = () => {
 
   const paymentModes = useMemo(
     () => [
-      {
-        id: "upi",
-        title: "UPI",
-        description: "Fastest checkout using supported UPI apps.",
-        icon: <FiSmartphone />,
-      },
-      {
-        id: "card",
-        title: "Card",
-        description: "Visa, Mastercard and other supported cards.",
-        icon: <FiCreditCard />,
-      },
-      {
-        id: "banking",
-        title: "Net banking",
-        description: "Continue with your bank's secure payment flow.",
-        icon: <FiShield />,
-      },
+      { id: "upi", title: "UPI" },
+      { id: "card", title: "Card" },
+      { id: "banking", title: "Net banking" },
     ],
     []
   );
 
-  const checkoutHighlights = useMemo(
-    () => [
-      {
-        title: "Secure checkout",
-        description: paymentMethod === "online" ? "Your payment is processed through the configured gateway." : "Your order will be confirmed with secure order tracking.",
-        icon: <FiShield />,
-      },
-      {
-        title: "Fast dispatch",
-        description: "Live cart pricing and delivery details are applied before confirmation.",
-        icon: <FiTruck />,
-      },
-      {
-        title: "Order updates",
-        description: "You'll receive order status updates after the payment or COD confirmation.",
-        icon: <FiClock />,
-      },
-    ],
-    [paymentMethod]
-  );
+  const selectedPaymentLabel = useMemo(() => {
+    if (paymentMethod === "cod") {
+      return "Cash on delivery";
+    }
+
+    const modeLabel = paymentModes.find((mode) => mode.id === onlineMode)?.title || "Online payment";
+    return `${modeLabel} payment`;
+  }, [onlineMode, paymentMethod, paymentModes]);
 
   const handleAddAddress = (data) => {
     dispatch(addAddressAsync(data));
-    reset();
+    reset({
+      fullName: loggedInUser?.name || "",
+      line1: "",
+      line2: "",
+      landmark: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "India",
+      phoneNumber: loggedInUser?.phone || "",
+      addressType: "home",
+      isDefault: false,
+    });
+    setShowAddressForm(false);
   };
 
   const placeCODOrder = () => {
@@ -306,113 +291,57 @@ export const Checkout = () => {
   }
 
   return (
-    <PageWrapper className="space-y-0 py-6 md:py-8">
-      <Card
-        hover={false}
-        className="overflow-hidden rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] px-5 py-6 shadow-[0_24px_56px_rgba(0,0,0,0.28)] sm:px-6 sm:py-7 md:rounded-[32px] lg:px-8"
-      >
-        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-4">
-            <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-textPrimary">
-              Checkout
-            </span>
-            <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary md:text-4xl">
-              Payment & delivery details
-            </h1>
-            <p className="max-w-2xl text-sm leading-7 text-textSecondary">
-              Enter shipping details, review live pricing, and continue with a premium secure payment flow that still uses the existing backend logic.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {checkoutHighlights.map((item) => (
-                <div key={item.title} className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-textPrimary">
-                    {item.icon}
-                  </div>
-                  <p className="mt-3 text-sm font-semibold text-textPrimary">{item.title}</p>
-                  <p className="mt-1 text-xs leading-6 text-textSecondary">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(18,26,40,0.94),rgba(11,16,26,0.94))] p-5 sm:p-6">
-            <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#89a8cc]">Payment information</p>
-              <div className="grid grid-cols-3 gap-3">
-                {paymentModes.map((mode) => (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => {
-                      setPaymentMethod("online");
-                      setOnlineMode(mode.id);
-                    }}
-                    className={[
-                      "rounded-[22px] border p-4 text-left transition",
-                      paymentMethod === "online" && onlineMode === mode.id
-                        ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.18))] shadow-[0_12px_30px_rgba(104,138,255,0.16)]"
-                        : "border-white/10 bg-white/[0.04] hover:border-[#8cc4ea]",
-                    ].join(" ")}
-                  >
-                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-[#8ebaf0]">
-                      {mode.icon}
-                    </div>
-                    <p className="mt-4 text-sm font-semibold text-textPrimary">{mode.title}</p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4 sm:p-5">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Email</p>
-                    <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.email || "Sign in to continue"}</p>
-                  </div>
-                  <div className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">Card holder</p>
-                    <p className="mt-2 text-sm font-medium text-textPrimary">{loggedInUser?.name || "Guest checkout disabled"}</p>
-                  </div>
-                  <div className="sm:col-span-2 rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#89a8cc]">Selected payment</p>
-                        <p className="mt-2 text-sm font-medium text-textPrimary">
-                          {paymentMethod === "online"
-                            ? `${paymentModes.find((mode) => mode.id === onlineMode)?.title || "Online payment"} will continue in the secure gateway window`
-                            : "Cash on Delivery selected"}
-                        </p>
-                      </div>
-                      <FiCheckCircle className="shrink-0 text-2xl text-[#55d48d]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-xs leading-6 text-[#7f9bbd]">
-                This section is styled like a premium payment form, but the actual transaction still runs through the configured secure gateway or COD flow.
-              </p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+    <PageWrapper className="py-6 md:py-8">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-6">
-          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-2xl font-semibold text-textPrimary">Delivery address</h2>
-                <p className="mt-2 text-sm text-textSecondary">Choose where the order should be delivered.</p>
-              </div>
+          <section className={sectionClassName}>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="space-y-3">
-                {addresses.map((address) => (
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Checkout</p>
+                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-textPrimary sm:text-4xl">Complete your order</h1>
+                <p className="max-w-2xl text-sm leading-6 text-textSecondary">
+                  Keep it simple: choose an address, pick a payment method, and review the total before confirming.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-textPrimary">
+                  {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
+                </span>
+                <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-textPrimary">
+                  {selectedPaymentLabel}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className={sectionClassName}>
+            <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-textPrimary">Delivery address</h2>
+                <p className="mt-2 text-sm text-textSecondary">Select a saved address or add a new one for this order.</p>
+              </div>
+
+              <Button
+                variant="secondary"
+                icon={<FiPlus />}
+                onClick={() => setShowAddressForm((prev) => !prev)}
+                className="w-full sm:w-auto"
+              >
+                {showAddressForm ? "Hide form" : "Add address"}
+              </Button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {addresses.length ? (
+                addresses.map((address) => (
                   <label
                     key={address._id}
                     className={[
-                      "flex cursor-pointer items-start gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
+                      "flex cursor-pointer items-start gap-3 rounded-[24px] border px-4 py-4 transition",
                       selectedAddressId === address._id
-                        ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))] shadow-[0_12px_28px_rgba(104,138,255,0.12)]"
-                        : "border-white/8 bg-white/[0.04]",
+                        ? "border-primary bg-surface"
+                        : "border-border bg-white hover:border-primary/15",
                     ].join(" ")}
                   >
                     <input
@@ -421,33 +350,31 @@ export const Checkout = () => {
                       onChange={() => setSelectedAddressId(address._id)}
                       className="mt-1 accent-primary"
                     />
-                    <div className="space-y-1">
+                    <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-textPrimary">{address.fullName || loggedInUser?.name}</p>
                         {address.isDefault ? (
-                            <span className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-textPrimary">
-                              Default
-                            </span>
+                          <span className="rounded-full border border-border bg-surface px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-textSecondary">
+                            Default
+                          </span>
                         ) : null}
                       </div>
-                      <p className="text-sm text-textSecondary">
+                      <p className="text-sm leading-6 text-textSecondary">
                         {address.line1 || address.street}, {address.city}, {address.state} - {address.postalCode}
                       </p>
                       <p className="text-sm text-textSecondary">{address.phoneNumber}</p>
                     </div>
                   </label>
-                ))}
-              </div>
+                ))
+              ) : (
+                <div className="rounded-[24px] border border-dashed border-border bg-surface px-4 py-5 text-sm text-textSecondary">
+                  No saved addresses yet. Add one to continue.
+                </div>
+              )}
             </div>
-          </Card>
 
-          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-textPrimary">Add new address</h2>
-                <p className="mt-2 text-sm text-textSecondary">Save a new address to your account before completing checkout.</p>
-              </div>
-              <form onSubmit={handleSubmit(handleAddAddress)} className="grid gap-4 md:grid-cols-12">
+            {showAddressForm ? (
+              <form onSubmit={handleSubmit(handleAddAddress)} className="mt-6 grid gap-4 border-t border-border pt-6 md:grid-cols-12">
                 <div className="md:col-span-6">
                   <Input label="Full name" {...register("fullName", { required: true })} />
                 </div>
@@ -478,99 +405,104 @@ export const Checkout = () => {
                 <div className="md:col-span-12">
                   <Input label="Country" {...register("country", { required: true })} />
                 </div>
-                <div className="md:col-span-12">
-                  <Button type="submit" variant="secondary" className="rounded-full">
+                <div className="md:col-span-12 flex flex-col gap-3 sm:flex-row">
+                  <Button type="submit" variant="primary" className="sm:w-auto">
                     Save address
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={() => setShowAddressForm(false)} className="sm:w-auto">
+                    Cancel
                   </Button>
                 </div>
               </form>
+            ) : null}
+          </section>
+
+          <section className={sectionClassName}>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight text-textPrimary">Payment method</h2>
+              <p className="text-sm text-textSecondary">Choose one payment option. Everything else stays out of the way.</p>
             </div>
-          </Card>
 
-          <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px]">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-2xl font-semibold text-textPrimary">Payment method</h2>
-                <p className="mt-2 text-sm text-textSecondary">Choose how you want to pay for this order.</p>
-              </div>
-              <div className="grid gap-3">
-                <label
-                  className={[
-                    "flex cursor-pointer items-center gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
-                    paymentMethod === "cod" ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))]" : "border-white/8 bg-white/[0.04]",
-                  ].join(" ")}
-                >
-                  <input type="radio" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="accent-primary" />
-                  <div>
-                    <p className="text-sm font-semibold text-textPrimary">Cash on Delivery</p>
-                    <p className="text-sm text-textSecondary">Pay once your order arrives.</p>
-                  </div>
-                </label>
-                <label
-                  className={[
-                    "flex cursor-pointer items-center gap-3 rounded-[24px] border p-4 transition sm:gap-4 sm:rounded-3xl",
-                    paymentMethod === "online" ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.18),rgba(104,138,255,0.14))]" : "border-white/8 bg-white/[0.04]",
-                  ].join(" ")}
-                >
-                  <input type="radio" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} className="accent-primary" />
-                  <div>
-                    <p className="text-sm font-semibold text-textPrimary">
-                      {paymentConfig.testMode
-                        ? "Online Payment (Local test mode)"
-                        : `Online Payment${paymentConfig.enabled ? " (Card / UPI / NetBanking)" : " (not configured locally)"}`}
-                    </p>
-                    <p className="text-sm text-textSecondary">
-                      {paymentConfig.testMode
-                        ? "No real money will be charged in local test mode."
-                        : "Use the configured gateway when available."}
-                    </p>
-                  </div>
-                </label>
-              </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("cod")}
+                className={[
+                  "rounded-[24px] border px-5 py-5 text-left transition",
+                  paymentMethod === "cod"
+                    ? "border-primary bg-surface"
+                    : "border-border bg-white hover:border-primary/15",
+                ].join(" ")}
+              >
+                <p className="text-base font-semibold text-textPrimary">Cash on Delivery</p>
+                <p className="mt-2 text-sm leading-6 text-textSecondary">Place the order now and pay when it arrives.</p>
+              </button>
 
-              {paymentMethod === "online" ? (
-                <div className="grid gap-3 sm:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("online")}
+                className={[
+                  "rounded-[24px] border px-5 py-5 text-left transition",
+                  paymentMethod === "online"
+                    ? "border-primary bg-surface"
+                    : "border-border bg-white hover:border-primary/15",
+                ].join(" ")}
+              >
+                <div className="flex items-center gap-2">
+                  <FiCreditCard className="text-textPrimary" />
+                  <p className="text-base font-semibold text-textPrimary">
+                    {paymentConfig.testMode ? "Online Payment (Test mode)" : "Online Payment"}
+                  </p>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-textSecondary">
+                  {paymentConfig.testMode
+                    ? "Use gateway test mode locally without charging real money."
+                    : "Continue in the secure gateway for UPI, card, or net banking."}
+                </p>
+              </button>
+            </div>
+
+            {paymentMethod === "online" ? (
+              <div className="mt-5 border-t border-border pt-5">
+                <p className="mb-3 text-sm font-medium text-textPrimary">Choose a mode</p>
+                <div className="flex flex-wrap gap-2">
                   {paymentModes.map((mode) => (
                     <button
                       key={mode.id}
                       type="button"
                       onClick={() => setOnlineMode(mode.id)}
                       className={[
-                        "rounded-[22px] border p-4 text-left transition",
+                        "rounded-full border px-4 py-2 text-sm font-medium transition",
                         onlineMode === mode.id
-                          ? "border-accent/35 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
-                          : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
+                          ? "border-primary bg-primary text-white"
+                          : "border-border bg-white text-textPrimary hover:border-primary/15 hover:bg-surface",
                       ].join(" ")}
                     >
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/5 text-inherit">
-                        {mode.icon}
-                      </div>
-                      <p className="mt-3 text-sm font-semibold">{mode.title}</p>
-                      <p className={["mt-1 text-xs leading-5", onlineMode === mode.id ? "text-white/70" : "text-textSecondary"].join(" ")}>
-                        {mode.description}
-                      </p>
+                      {mode.title}
                     </button>
                   ))}
                 </div>
-              ) : null}
-            </div>
-          </Card>
+                <p className="mt-3 text-sm text-textSecondary">
+                  {paymentConfig.enabled
+                    ? "You’ll be redirected to the configured secure payment provider after confirming the order."
+                    : "Online payment is not configured on this server yet, so Cash on Delivery is the safe option for now."}
+                </p>
+              </div>
+            ) : null}
+          </section>
         </div>
 
-        <Card
-          hover={false}
-          className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-5 sm:p-6 md:rounded-[32px] xl:sticky xl:top-28 xl:h-fit"
-        >
+        <aside className={`${sectionClassName} xl:sticky xl:top-28 xl:h-fit`}>
           <div className="space-y-5">
-            <div>
-              <h2 className="text-2xl font-semibold text-textPrimary">Order summary</h2>
-              <p className="mt-2 text-sm text-textSecondary">All totals reflect live backend pricing and selected delivery address rules.</p>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold tracking-tight text-textPrimary">Order summary</h2>
+              <p className="text-sm text-textSecondary">Compact review before you confirm.</p>
             </div>
 
             <div className="space-y-3">
               {cartItems.map((item) => (
-                <div key={item._id} className="flex items-start gap-3 rounded-[22px] border border-white/8 bg-white/[0.04] p-3">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[18px] border border-white/10 bg-white/[0.06] p-2">
+                <div key={item._id} className="flex items-start gap-3 rounded-[22px] border border-border bg-surface p-3">
+                  <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-[18px] border border-border bg-white p-2">
                     <ProductVisual
                       product={item.product}
                       alt={item.product.name || item.product.title}
@@ -581,19 +513,13 @@ export const Checkout = () => {
                     <p className="line-clamp-2 text-sm font-semibold text-textPrimary">
                       {item.product.name || item.product.title}
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-textSecondary">
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-textSecondary">
                       <span className="inline-flex items-center gap-1">
                         <FiPackage />
                         Qty {item.quantity}
                       </span>
-                      {selectedAddressId ? (
-                        <span className="inline-flex items-center gap-1">
-                          <FiMapPin />
-                          Delivery linked
-                        </span>
-                      ) : null}
+                      <span>{formatPrice(item.product.price * item.quantity)}</span>
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-textPrimary">{formatPrice(item.product.price * item.quantity)}</p>
                   </div>
                 </div>
               ))}
@@ -606,7 +532,21 @@ export const Checkout = () => {
               placeholder="Enter coupon"
             />
 
-            <div className="space-y-3 border-y border-white/8 py-4 text-sm">
+            <div className="rounded-[24px] border border-border bg-surface px-4 py-4">
+              <div className="flex items-start gap-3">
+                <FiMapPin className="mt-0.5 shrink-0 text-textPrimary" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-textPrimary">Delivery</p>
+                  <p className="mt-1 text-sm leading-6 text-textSecondary">
+                    {selectedAddressId
+                      ? "Address selected and pricing updated for checkout."
+                      : "Select a delivery address to continue."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-y border-border py-4 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-textSecondary">Subtotal</span>
                 <span className="text-textPrimary">{formatPrice(summary.subtotal)}</span>
@@ -622,39 +562,38 @@ export const Checkout = () => {
               {summary.couponDiscount > 0 ? (
                 <div className="flex items-center justify-between">
                   <span className="text-textSecondary">Coupon discount</span>
-                  <span className="text-accent">- {formatPrice(summary.couponDiscount)}</span>
+                  <span className="text-[#2f8f5b]">- {formatPrice(summary.couponDiscount)}</span>
                 </div>
               ) : null}
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-base font-semibold text-textPrimary">Total payable</span>
-              <span className="text-2xl font-semibold text-textPrimary">{formatPrice(summary.total)}</span>
+              <span className="text-base font-semibold text-textPrimary">Total</span>
+              <span className="text-2xl font-semibold tracking-tight text-textPrimary">{formatPrice(summary.total)}</span>
             </div>
 
-            <div className="rounded-[24px] border border-white/8 bg-white/[0.04] p-4">
+            <div className="rounded-[24px] border border-border bg-surface px-4 py-4">
               <div className="flex items-start gap-3">
-                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-textPrimary">
-                  <FiShield />
-                </div>
+                <FiCheckCircle className="mt-0.5 shrink-0 text-[#2f8f5b]" />
                 <div>
-                  <p className="text-sm font-semibold text-textPrimary">
-                    {paymentMethod === "online" ? "Secure gateway handoff" : "Cash on delivery confirmation"}
-                  </p>
-                  <p className="mt-1 text-xs leading-6 text-textSecondary">
+                  <p className="text-sm font-semibold text-textPrimary">{selectedPaymentLabel}</p>
+                  <p className="mt-1 text-sm leading-6 text-textSecondary">
                     {paymentMethod === "online"
-                      ? "After tapping the payment button, the secure provider window opens for UPI, card, or bank authorization."
-                      : "Your order will be placed instantly and payment will happen at delivery."}
+                      ? "Secure payment window opens after confirmation."
+                      : "Your order is confirmed first and payment happens on delivery."}
                   </p>
                 </div>
               </div>
             </div>
 
-            {paymentError ? <p className="rounded-2xl border border-rose-400/30 bg-rose-950/30 px-4 py-3 text-sm text-rose-200">{paymentError}</p> : null}
+            {paymentError ? (
+              <p className="rounded-2xl border border-[#e9b4b4] bg-[#fff1f1] px-4 py-3 text-sm text-[#9b4242]">
+                {paymentError}
+              </p>
+            ) : null}
 
             <Button
               fullWidth
-              className="rounded-full"
               onClick={() => {
                 setPaymentError("");
                 if (paymentMethod === "online") {
@@ -676,10 +615,10 @@ export const Checkout = () => {
                 ? paymentConfig.testMode
                   ? "Test online payment"
                   : "Pay securely"
-                : "Place COD order"}
+                : "Place order"}
             </Button>
           </div>
-        </Card>
+        </aside>
       </div>
     </PageWrapper>
   );

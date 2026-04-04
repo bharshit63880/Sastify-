@@ -23,12 +23,6 @@ import {
   verifyOtpAsync,
 } from "../AuthSlice";
 
-const verificationHighlights = [
-  "Your account stays protected until the email owner confirms access.",
-  "Verified accounts can proceed to checkout, saved orders, and secure account flows.",
-  "You can request a fresh OTP anytime if the previous one expires.",
-];
-
 export const OtpVerfication = () => {
   const {
     register,
@@ -126,21 +120,11 @@ export const OtpVerfication = () => {
   return (
     <AuthShell
       eyebrow="Email verification required"
-      title="Confirm your email before you continue shopping."
-      description="We use a one-time password to confirm account ownership and keep checkout, orders, and saved account data secure."
-      highlights={verificationHighlights}
+      title="Verify your email"
+      description="Enter the one-time password sent to your inbox to activate your account."
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-tight text-textPrimary">Verify your email</h2>
-          <p className="text-sm text-textSecondary">
-            {shouldShowOtpForm
-              ? "Enter the OTP sent to your inbox to activate your account."
-              : "We will send a one-time password to your registered email address."}
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="rounded-[24px] border border-border bg-surface p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-textSecondary">Registered email</p>
           <p className="mt-2 text-sm font-semibold text-textPrimary">{loggedInUser?.email}</p>
         </div>

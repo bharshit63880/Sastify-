@@ -66,20 +66,10 @@ export const ResetPassword = () => {
   return (
     <AuthShell
       eyebrow="Set a new password"
-      title="Choose a fresh password and get back into your account."
-      description="Your updated password will be used immediately for login, checkout, and every protected flow in the storefront."
-      highlights={[
-        "Password requirements are validated before submission",
-        "The reset token flow is preserved exactly as implemented",
-        "You will be redirected back to login after success",
-      ]}
+      title="Choose a new password"
+      description="Update your password and return to your account."
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-tight text-textPrimary">Reset password</h2>
-          <p className="text-sm text-textSecondary">Please enter and confirm your new password.</p>
-        </div>
-
         <form onSubmit={handleSubmit(handleResetPassword)} className="space-y-4">
           <Input
             label="New password"

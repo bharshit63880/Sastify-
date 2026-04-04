@@ -15,12 +15,6 @@ import {
   selectLoginStatus,
 } from "../AuthSlice";
 
-const authHighlights = [
-  "Curated catalog across lifestyle and home essentials",
-  "Secure checkout with COD and online payment architecture",
-  "Order tracking, account history, and trusted delivery messaging",
-];
-
 export const Login = () => {
   const dispatch = useDispatch();
   const status = useSelector(selectLoginStatus);
@@ -57,16 +51,10 @@ export const Login = () => {
   return (
     <AuthShell
       eyebrow="Welcome back"
-      title="Sign in to continue your marketplace journey."
-      description="Access your cart, saved addresses, orders, and secure checkout from one polished workspace."
-      highlights={authHighlights}
+      title="Sign in"
+      description="Access your cart, orders, and checkout in one clean workspace."
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-tight text-textPrimary">Login</h2>
-          <p className="text-sm text-textSecondary">Use your registered email to access your account.</p>
-        </div>
-
         <form onSubmit={handleSubmit((data) => dispatch(loginAsync(data)))} className="space-y-4">
           <Input
             label="Email"
@@ -99,8 +87,6 @@ export const Login = () => {
             Create account
           </Link>
         </div>
-
-       
       </div>
     </AuthShell>
   );

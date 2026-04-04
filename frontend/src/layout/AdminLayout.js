@@ -41,14 +41,14 @@ export const AdminLayout = () => {
   };
 
   const navContent = (
-    <div className="flex h-full flex-col gap-8 rounded-r-[32px] border-r border-white/10 bg-slate-950/90 px-5 py-6 backdrop-blur-xl lg:w-72">
+    <div className="flex h-full flex-col gap-7 border-r border-[#20263a] bg-[#171b2b] px-5 py-6 lg:w-[248px]">
       <div className="space-y-3">
-        <span className="inline-flex w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+        <span className="inline-flex w-fit rounded-full border border-white/8 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#b8c1d9]">
           Admin Console
         </span>
         <div>
           <h1 className="text-2xl font-semibold text-textPrimary">Sastify Admin</h1>
-          <p className="mt-2 text-sm text-textSecondary">Catalog, orders, users, and promotions in one place.</p>
+          <p className="mt-2 text-sm leading-6 text-[#98a3bf]">Catalog, orders, users, and promotions in one place.</p>
         </div>
       </div>
 
@@ -61,10 +61,10 @@ export const AdminLayout = () => {
               to={item.to}
               onClick={() => setOpen(false)}
               className={[
-                "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                "flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm font-medium transition",
                 active
-                  ? "border border-primary/30 bg-primary/15 text-textPrimary shadow-glow"
-                  : "text-textSecondary hover:bg-white/[0.05] hover:text-textPrimary",
+                  ? "bg-white text-[#171b2b] shadow-[0_12px_24px_rgba(0,0,0,0.14)]"
+                  : "text-[#a7b1ca] hover:bg-white/6 hover:text-white",
               ].join(" ")}
             >
               <span className="text-base">{item.icon}</span>
@@ -75,9 +75,9 @@ export const AdminLayout = () => {
       </div>
 
       <div className="mt-auto space-y-4">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="rounded-[24px] border border-white/8 bg-white/5 p-4">
           <p className="text-sm font-semibold text-textPrimary">Operations snapshot</p>
-          <p className="mt-2 text-sm text-textSecondary">Monitor inventory, shipping state changes, and customer access from a single workspace.</p>
+          <p className="mt-2 text-sm leading-6 text-[#98a3bf]">Monitor inventory, shipping state changes, and customer access from a single workspace.</p>
         </div>
         <Button variant="secondary" fullWidth icon={<FiLogOut />} onClick={handleLogout}>
           Logout
@@ -120,7 +120,7 @@ export const AdminLayout = () => {
         </AnimatePresence>
 
         <div className="flex-1">
-          <div className="sticky top-0 z-30 border-b border-white/10 bg-background/80 backdrop-blur-xl lg:hidden">
+          <div className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-xl lg:hidden">
             <Container className="flex items-center justify-between py-4">
               <button
                 onClick={() => setOpen(true)}
@@ -136,7 +136,7 @@ export const AdminLayout = () => {
             </Container>
           </div>
 
-          <Container className="py-8 lg:py-10">
+          <Container className="py-6 lg:py-8">
             {!isDesktop ? (
               <div className="mb-6 flex justify-end lg:hidden">
                 <button

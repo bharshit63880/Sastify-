@@ -15,11 +15,11 @@ const User = require("../models/User");
 const Wishlist = require("../models/Wishlist");
 const { slugify } = require("../utils/slugify");
 
-const PRODUCTS_PER_CATEGORY = 22;
-const TARGET_CATEGORY_COUNT = 10;
-const TARGET_PRODUCT_COUNT = 100;
-const TARGET_REVIEW_COUNT = 15;
-const TARGET_BRAND_COUNT = 18;
+const PRODUCTS_PER_CATEGORY = 16;
+const TARGET_CATEGORY_COUNT = 40;
+const TARGET_PRODUCT_COUNT = 144;
+const TARGET_REVIEW_COUNT = 36;
+const TARGET_BRAND_COUNT = 28;
 const GENERATED_CUSTOMER_COUNT = 140;
 const GENERATED_ORDER_COUNT = 240;
 
@@ -41,56 +41,52 @@ const segments = {
 };
 
 const categoryRows = [
-  ["Smartphones", "Smartphone", "mobile", ["mobile"], "5G-ready smartphones for daily use and streaming."],
-  ["Feature Phones", "Feature Phone", "mobile", ["mobile"], "Reliable keypad phones with long battery life."],
-  ["Tablets", "Tablet", "mobile", ["mobile"], "Tablets for entertainment, classes, and light work."],
-  ["Power Banks", "Power Bank", "mobile", ["mobile"], "Portable charging for work, travel, and backup."],
-  ["Chargers & Cables", "Charger", "mobile", ["mobile"], "Fast charging accessories for phones and tablets."],
-  ["Smartwatches", "Smartwatch", "wearable", ["wearable", "watch"], "Smartwatches with calling and health tracking."],
-  ["Fitness Bands", "Fitness Band", "wearable", ["wearable"], "Lightweight bands for step goals and wellness."],
-  ["Earbuds", "Earbuds", "audio", ["audio"], "True wireless earbuds for music and calls."],
-  ["Bluetooth Speakers", "Speaker", "audio", ["audio"], "Portable speakers for home and outdoor use."],
-  ["Headphones", "Headphones", "audio", ["audio"], "Over-ear and on-ear headphones for daily listening."],
-  ["Soundbars", "Soundbar", "audio", ["audio"], "TV soundbars with clearer dialogue and fuller audio."],
-  ["Televisions", "Television", "appliance", ["appliance"], "Smart TVs built for streaming and sports."],
-  ["Refrigerators", "Refrigerator", "appliance", ["appliance"], "Single and double-door fridges for modern kitchens."],
-  ["Washing Machines", "Washing Machine", "appliance", ["appliance"], "Laundry appliances for family homes."],
-  ["Air Conditioners", "Air Conditioner", "appliance", ["appliance"], "Cooling solutions for Indian summers."],
-  ["Air Coolers", "Air Cooler", "appliance", ["appliance"], "Room coolers for bedrooms and study spaces."],
-  ["Microwave Ovens", "Microwave Oven", "appliance", ["appliance", "kitchen"], "Microwave ovens for reheating and quick meals."],
-  ["Water Purifiers", "Water Purifier", "appliance", ["appliance"], "RO and UV purifiers for home drinking water."],
-  ["Mixer Grinders", "Mixer Grinder", "kitchen", ["kitchen", "appliance"], "Daily kitchen prep appliances for chutneys and batters."],
-  ["Induction Cooktops", "Induction Cooktop", "kitchen", ["kitchen", "appliance"], "Portable cooktops for efficient compact cooking."],
-  ["Pressure Cookers", "Pressure Cooker", "kitchen", ["kitchen"], "Pressure cookers for everyday Indian meals."],
-  ["Cookware Sets", "Cookware Set", "kitchen", ["kitchen"], "Pots and pans for regular home cooking."],
-  ["Dinner Sets", "Dinner Set", "kitchen", ["kitchen"], "Ceramic and glass dinnerware for family dining."],
-  ["Water Bottles", "Bottle", "kitchen", ["kitchen"], "Insulated bottles and drinkware for office, school, and travel."],
-  ["Sofas", "Sofa", "furniture", ["furniture"], "Comfort-focused sofas for living rooms."],
-  ["Coffee Tables", "Coffee Table", "furniture", ["furniture"], "Centre tables for everyday living spaces."],
-  ["Study Desks", "Study Desk", "office", ["office", "furniture"], "Work and study desks for compact home setups."],
-  ["Office Chairs", "Office Chair", "office", ["office", "furniture"], "Ergonomic office chairs for long work sessions."],
-  ["Beds", "Bed", "furniture", ["furniture"], "Beds for modern bedrooms and guest rooms."],
-  ["Mattresses", "Mattress", "furniture", ["furniture"], "Mattresses designed for support and airflow."],
-  ["Wardrobes", "Wardrobe", "furniture", ["furniture"], "Spacious wardrobes with shelves and hanging storage."],
-  ["Storage Cabinets", "Storage Cabinet", "furniture", ["furniture"], "Storage units for utility and bedroom organization."],
-  ["Curtains", "Curtain Set", "decor", ["decor"], "Window curtains for privacy and light control."],
-  ["Bedsheets", "Bedsheet Set", "decor", ["decor"], "Bedsheets and bedding sets for everyday comfort."],
-  ["Home Lighting", "Light", "decor", ["decor"], "Table lamps, floor lamps, and home lighting."],
-  ["Wall Decor", "Wall Decor", "decor", ["decor"], "Mirrors, framed art, and decorative accents."],
-  ["Skincare", "Skincare Kit", "personalCare", ["personal-care"], "Serums, cleansers, and moisturisers for daily routines."],
-  ["Hair Care", "Hair Care Kit", "personalCare", ["personal-care"], "Shampoos, oils, and masks for regular care."],
-  ["Grooming Kits", "Grooming Kit", "personalCare", ["personal-care"], "Grooming kits and tools for personal upkeep."],
-  ["Makeup", "Makeup Kit", "personalCare", ["personal-care", "fashion"], "Face, lip, and eye products for daily looks."],
-  ["Wellness Supplements", "Supplement Pack", "fitness", ["wellness", "fitness", "personal-care"], "Supplements and nutrition support for active lifestyles."],
-  ["Fitness Equipment", "Fitness Equipment", "fitness", ["fitness"], "Home workout essentials for strength and cardio."],
-  ["Yoga Essentials", "Yoga Kit", "fitness", ["fitness"], "Yoga mats and accessories for mindful movement."],
-  ["Men's Fashion", "Menswear", "fashion", ["fashion"], "Men's apparel for work, travel, and casual styling."],
-  ["Women's Fashion", "Womenswear", "fashion", ["fashion"], "Women's apparel with versatile everyday styling."],
-  ["Footwear", "Footwear", "fashion", ["fashion"], "Sneakers, sandals, and everyday footwear."],
-  ["Watches", "Watch", "watch", ["watch", "fashion"], "Analog and hybrid watch styles for daily wear."],
-  ["Backpacks", "Backpack", "travel", ["travel", "fashion"], "Backpacks for commute, college, work, and short trips."],
-  ["Travel Luggage", "Luggage Set", "travel", ["travel"], "Cabin luggage and travel suitcases for frequent flyers."],
-  ["Baby Care", "Baby Care Kit", "baby", ["baby"], "Baby essentials for feeding, hygiene, and comfort."],
+  ["Electronics", "Category", "mobile", ["mobile", "audio", "wearable"], "Phones, audio, and daily electronics.", null, false],
+  ["Mobiles", "Category", "mobile", ["mobile"], "Smartphones, tablets, and power essentials.", "Electronics", false],
+  ["Smartphones", "Smartphone", "mobile", ["mobile"], "5G-ready smartphones for daily use and streaming.", "Mobiles", true],
+  ["Feature Phones", "Feature Phone", "mobile", ["mobile"], "Reliable keypad phones with long battery life.", "Mobiles", true],
+  ["Tablet Accessories", "Tablet Accessory", "mobile", ["mobile"], "Covers, keyboards, and mobile productivity add-ons.", "Mobiles", true],
+  ["Audio", "Category", "audio", ["audio"], "Everyday listening, calls, and home sound.", "Electronics", false],
+  ["Earbuds", "Earbuds", "audio", ["audio"], "True wireless earbuds for music and calls.", "Audio", true],
+  ["Headphones", "Headphones", "audio", ["audio"], "Over-ear and on-ear headphones for daily listening.", "Audio", true],
+  ["Bluetooth Speakers", "Speaker", "audio", ["audio"], "Portable speakers for home and outdoor use.", "Audio", true],
+  ["Wearables", "Category", "wearable", ["wearable", "watch"], "Smart devices for wellness and everyday activity.", "Electronics", false],
+  ["Smartwatches", "Smartwatch", "wearable", ["wearable", "watch"], "Smartwatches with calling and health tracking.", "Wearables", true],
+  ["Fitness Bands", "Fitness Band", "wearable", ["wearable"], "Lightweight bands for step goals and wellness.", "Wearables", true],
+
+  ["Home & Kitchen", "Category", "appliance", ["appliance", "kitchen", "decor"], "Appliances, kitchenware, and practical home essentials.", null, false],
+  ["Kitchen Appliances", "Category", "kitchen", ["kitchen", "appliance"], "Countertop tools and cookware for daily cooking.", "Home & Kitchen", false],
+  ["Mixer Grinders", "Mixer Grinder", "kitchen", ["kitchen", "appliance"], "Daily kitchen prep appliances for chutneys and batters.", "Kitchen Appliances", true],
+  ["Induction Cooktops", "Induction Cooktop", "kitchen", ["kitchen", "appliance"], "Portable cooktops for efficient compact cooking.", "Kitchen Appliances", true],
+  ["Cookware", "Category", "kitchen", ["kitchen"], "Everyday cookware and dining pieces.", "Home & Kitchen", false],
+  ["Cookware Sets", "Cookware Set", "kitchen", ["kitchen"], "Pots and pans for regular home cooking.", "Cookware", true],
+  ["Pressure Cookers", "Pressure Cooker", "kitchen", ["kitchen"], "Pressure cookers for everyday Indian meals.", "Cookware", true],
+  ["Home Appliances", "Category", "appliance", ["appliance"], "Large and small appliances for modern homes.", "Home & Kitchen", false],
+  ["Air Conditioners", "Air Conditioner", "appliance", ["appliance"], "Cooling solutions for Indian summers.", "Home Appliances", true],
+  ["Refrigerators", "Refrigerator", "appliance", ["appliance"], "Single and double-door fridges for modern kitchens.", "Home Appliances", true],
+  ["Home Decor", "Category", "decor", ["decor"], "Soft furnishings and accents for premium homes.", "Home & Kitchen", false],
+  ["Wall Decor", "Wall Decor", "decor", ["decor"], "Mirrors, framed art, and decorative accents.", "Home Decor", true],
+  ["Home Lighting", "Light", "decor", ["decor"], "Table lamps, floor lamps, and home lighting.", "Home Decor", true],
+
+  ["Fashion", "Category", "fashion", ["fashion", "travel", "watch"], "Style essentials across apparel, footwear, and accessories.", null, false],
+  ["Menswear", "Category", "fashion", ["fashion"], "Everyday menswear for work, travel, and casual styling.", "Fashion", false],
+  ["Men's Fashion", "Menswear", "fashion", ["fashion"], "Men's apparel for work, travel, and casual styling.", "Menswear", true],
+  ["Womenswear", "Category", "fashion", ["fashion"], "Versatile womenswear with elevated everyday fits.", "Fashion", false],
+  ["Women's Fashion", "Womenswear", "fashion", ["fashion"], "Women's apparel with versatile everyday styling.", "Womenswear", true],
+  ["Footwear", "Category", "fashion", ["fashion"], "Sneakers, sandals, and daily essentials.", "Fashion", false],
+  ["Sneakers", "Footwear", "fashion", ["fashion"], "Sneakers, sandals, and everyday footwear.", "Footwear", true],
+  ["Accessories", "Category", "watch", ["watch", "travel", "fashion"], "Watches, bags, and travel carry.", "Fashion", false],
+  ["Watches", "Watch", "watch", ["watch", "fashion"], "Analog and hybrid watch styles for daily wear.", "Accessories", true],
+  ["Backpacks", "Backpack", "travel", ["travel", "fashion"], "Backpacks for commute, college, work, and short trips.", "Accessories", true],
+
+  ["Beauty & Wellness", "Category", "personalCare", ["personal-care", "fitness", "baby"], "Personal care, wellness, and family essentials.", null, false],
+  ["Skincare", "Category", "personalCare", ["personal-care"], "Daily skincare routines with high-trust brands.", "Beauty & Wellness", false],
+  ["Face Serums", "Skincare Kit", "personalCare", ["personal-care"], "Serums, cleansers, and moisturisers for daily routines.", "Skincare", true],
+  ["Hair Care", "Category", "personalCare", ["personal-care"], "Haircare routines for repair, nourishment, and styling.", "Beauty & Wellness", false],
+  ["Hair Care Kits", "Hair Care Kit", "personalCare", ["personal-care"], "Shampoos, oils, and masks for regular care.", "Hair Care", true],
+  ["Fitness", "Category", "fitness", ["fitness", "wellness"], "Home workout and active lifestyle essentials.", "Beauty & Wellness", false],
+  ["Fitness Equipment", "Fitness Equipment", "fitness", ["fitness"], "Home workout essentials for strength and cardio.", "Fitness", true],
+  ["Wellness Supplements", "Supplement Pack", "fitness", ["wellness", "fitness", "personal-care"], "Supplements and nutrition support for active lifestyles.", "Fitness", true],
 ];
 
 const brandRows = [
@@ -235,9 +231,52 @@ const getBrandsForCategory = (category, brands) => brands.filter((brand) => bran
 const buildHighlights = (category, brand, cfg, index) => [`${pick(cfg.d, index)} design tuned for Indian households and daily use.`, `${brand.name} backed product configuration with marketplace-ready packaging.`, `${pick(cfg.c, index)} finish matched with practical everyday usability.`, `${category.productType} setup designed for value, reliability, and repeat usage.`];
 const getProductAt = (products, index) => products[index % products.length];
 
+const pickBrandsForSeed = (rows, categoryRowsMeta, targetCount) => {
+  const requiredTags = new Set(
+    categoryRowsMeta
+      .filter(([, , , , , , isLeaf = true]) => isLeaf !== false)
+      .flatMap(([, , , brandTags]) => brandTags)
+  );
+
+  const selected = [];
+  const coveredTags = new Set();
+
+  rows.forEach((row) => {
+    const [, tags] = row;
+    const addsCoverage = tags.some((tag) => requiredTags.has(tag) && !coveredTags.has(tag));
+
+    if (!addsCoverage) {
+      return;
+    }
+
+    selected.push(row);
+    tags.forEach((tag) => {
+      if (requiredTags.has(tag)) {
+        coveredTags.add(tag);
+      }
+    });
+  });
+
+  rows.forEach((row) => {
+    if (selected.length >= targetCount) {
+      return;
+    }
+
+    if (!selected.includes(row)) {
+      selected.push(row);
+    }
+  });
+
+  return selected;
+};
+
 const buildProductsData = (categories, brands) => {
   const products = [];
   categories.forEach((category, categoryIndex) => {
+    if (category.isLeaf === false) {
+      return;
+    }
+
     if (products.length >= TARGET_PRODUCT_COUNT) {
       return;
     }
@@ -245,13 +284,14 @@ const buildProductsData = (categories, brands) => {
     const cfg = segments[category.segment];
     const priceStep = cfg.p[1] > 20000 ? 500 : cfg.p[1] > 5000 ? 100 : 50;
     const matchingBrands = getBrandsForCategory(category, brands);
+    const eligibleBrands = matchingBrands.length ? matchingBrands : brands;
     for (let i = 0; i < PRODUCTS_PER_CATEGORY; i += 1) {
       if (products.length >= TARGET_PRODUCT_COUNT) {
         break;
       }
 
       const idx = categoryIndex * PRODUCTS_PER_CATEGORY + i;
-      const brand = pick(matchingBrands, idx);
+      const brand = pick(eligibleBrands, idx);
       const name = `${brand.name} ${pick(cfg.d, idx)} ${category.productType} ${pick(["Neo", "Prime", "Max", "Select", "Edge", "Lite"], idx)} ${100 + ((idx * 17) % 900)}`;
       const rawPrice = cfg.p[0] + (((idx * 137) + (categoryIndex * 59)) % (cfg.p[1] - cfg.p[0] + 1));
       const price = roundTo(rawPrice, priceStep);
@@ -325,22 +365,35 @@ async function seed() {
   await Promise.all([Wishlist.deleteMany({}), Cart.deleteMany({}), Payment.deleteMany({}), Order.deleteMany({}), Review.deleteMany({}), Address.deleteMany({}), Coupon.deleteMany({}), Product.deleteMany({}), Brand.deleteMany({}), Category.deleteMany({}), User.deleteMany({})]);
 
   const limitedCategoryRows = categoryRows.slice(0, TARGET_CATEGORY_COUNT);
-  const categories = await Category.insertMany(
-    limitedCategoryRows.map(([name, , segment, , description]) => ({
+  const categories = [];
+  const categoryByName = new Map();
+
+  for (const [name, , segment, , description, parentName] of limitedCategoryRows) {
+    const parentCategory = parentName ? categoryByName.get(parentName) : null;
+    const slug = slugify(name);
+    const created = await Category.create({
       name,
       description,
       image: segments[segment]?.img?.[0] ? image(segments[segment].img[0]) : "",
       isActive: true,
-    }))
-  );
-  const trimmedBrands = brandRows.slice(0, TARGET_BRAND_COUNT);
+      parentId: parentCategory?._id || null,
+      level: parentCategory ? Number(parentCategory.level || 0) + 1 : 0,
+      path: parentCategory ? `${parentCategory.path}/${slug}` : slug,
+    });
+
+    categories.push(created);
+    categoryByName.set(name, created);
+  }
+  const trimmedBrands = pickBrandsForSeed(brandRows, limitedCategoryRows, TARGET_BRAND_COUNT);
   const brands = await Brand.insertMany(trimmedBrands.map(([name, , description]) => ({ name, description, isActive: true })));
-  const categoriesWithMeta = limitedCategoryRows.map(([name, productType, segment, brandTags, description]) => ({
+  const categoriesWithMeta = limitedCategoryRows.map(([name, productType, segment, brandTags, description, parentName, isLeaf = true]) => ({
     name,
     productType,
     segment,
     brandTags,
     description,
+    parentName,
+    isLeaf,
     _id: categories.find((entry) => entry.name === name)._id,
   }));
   const brandsWithMeta = trimmedBrands.map(([name, tags, description]) => ({

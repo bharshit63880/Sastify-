@@ -4,9 +4,7 @@ import { FiFilter, FiSliders, FiX } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { EmptyState } from "../../../components/EmptyState";
 import { LoadingState } from "../../../components/LoadingState";
-import { NewsletterBanner } from "../../../components/NewsletterBanner";
 import { Button } from "../../../components/ui/Button";
-import { Card } from "../../../components/ui/Card";
 import { Input } from "../../../components/ui/Input";
 import { PageWrapper } from "../../../components/ui/PageWrapper";
 import { Section } from "../../../components/ui/Section";
@@ -34,10 +32,10 @@ const FilterChip = ({ active, children, onClick, disabled = false }) => (
     disabled={disabled}
     onClick={onClick}
     className={[
-      "rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-xl transition duration-300",
+      "rounded-full border px-4 py-2 text-sm font-medium transition",
       active
-        ? "border-accent/40 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white shadow-[0_14px_32px_rgba(200,139,74,0.14)]"
-        : "border-white/10 bg-white/[0.04] text-textSecondary hover:border-accent/25 hover:bg-white/[0.06] hover:text-textPrimary",
+        ? "border-primary bg-primary text-white"
+        : "border-border bg-white text-textSecondary hover:border-primary/15 hover:text-textPrimary",
       disabled ? "cursor-not-allowed opacity-40" : "",
     ].join(" ")}
   >
@@ -45,41 +43,44 @@ const FilterChip = ({ active, children, onClick, disabled = false }) => (
   </button>
 );
 
-const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands, lockedCategoryId }) => (
+const FilterPanel = ({ filters, setFilters, categories, availableBrands, lockedCategoryIds = [] }) => (
   <div className="space-y-7">
-    <div className="flex items-center justify-between border-b border-white/8 pb-4">
+    <div className="flex items-center justify-between border-b border-border pb-4">
       <p className="text-lg font-semibold text-textPrimary">Filters</p>
       <FiSliders className="text-textSecondary" />
     </div>
 
     <div className="space-y-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Categories</p>
-      <div className="flex flex-wrap gap-2">
-        {categories.map((category) => (
-          <FilterChip
-            key={category._id}
-            active={filters.category.includes(category._id)}
-            disabled={Boolean(lockedCategoryId && category._id !== lockedCategoryId)}
-            onClick={() => {
-              if (lockedCategoryId) {
-                return;
-              }
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textSecondary">Categories</p>
+      {lockedCategoryIds.length ? (
+        <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm leading-6 text-textSecondary">
+          Category scope is fixed for this page. Use the category links above to move across departments.
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <FilterChip
+              key={category._id}
+              active={filters.category.includes(category._id)}
+              disabled={Boolean(lockedCategoryIds.length && !lockedCategoryIds.includes(category._id))}
+              onClick={() => {
+                if (lockedCategoryIds.length) return;
 
-              setFilters((prev) => ({
-                ...prev,
-                category: prev.category.includes(category._id) ? [] : [category._id],
-              }));
-            }}
-          >
-            {category.name}
-          </FilterChip>
-        ))}
-      </div>
-      <p className="text-xs text-textSecondary">Pick one category to keep the catalog clean and focused.</p>
+                setFilters((prev) => ({
+                  ...prev,
+                  category: prev.category.includes(category._id) ? [] : [category._id],
+                }));
+              }}
+            >
+              {category.name}
+            </FilterChip>
+          ))}
+        </div>
+      )}
     </div>
 
     <div className="space-y-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Brands</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textSecondary">Brands</p>
       {filters.category.length ? (
         <div className="flex flex-wrap gap-2">
           {availableBrands.length ? (
@@ -100,11 +101,11 @@ const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands,
               </FilterChip>
             ))
           ) : (
-            <p className="text-xs text-textSecondary">No brands found for this category.</p>
+            <p className="text-sm text-textSecondary">No matching brands for this category.</p>
           )}
         </div>
       ) : (
-        <p className="text-xs text-textSecondary">Select a category to reveal matching brands.</p>
+        <p className="text-sm text-textSecondary">Choose a category to narrow the available brands.</p>
       )}
     </div>
 
@@ -128,7 +129,7 @@ const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands,
     </div>
 
     <div className="space-y-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Rating</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textSecondary">Rating</p>
       <div className="flex flex-wrap gap-2">
         {[4, 3, 2].map((rating) => (
           <FilterChip
@@ -136,14 +137,14 @@ const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands,
             active={filters.rating === rating}
             onClick={() => setFilters((prev) => ({ ...prev, rating: prev.rating === rating ? 0 : rating }))}
           >
-            {rating}+ Stars
+            {rating}+ stars
           </FilterChip>
         ))}
       </div>
     </div>
 
     <div className="space-y-4">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">Discount</p>
+      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-textSecondary">Discount</p>
       <div className="flex flex-wrap gap-2">
         {[10, 25, 40].map((discount) => (
           <FilterChip
@@ -151,18 +152,18 @@ const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands,
             active={filters.discount === discount}
             onClick={() => setFilters((prev) => ({ ...prev, discount: prev.discount === discount ? 0 : discount }))}
           >
-            {discount}% or More
+            {discount}%+
           </FilterChip>
         ))}
       </div>
     </div>
 
-    <label className="flex items-center gap-3 rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textPrimary backdrop-blur-xl">
+    <label className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-textPrimary">
       <input
         type="checkbox"
         checked={filters.inStock}
         onChange={(event) => setFilters((prev) => ({ ...prev, inStock: event.target.checked }))}
-        className="h-4 w-4 rounded border-white/20 accent-accent"
+        className="h-4 w-4 rounded border-border accent-primary"
       />
       In stock only
     </label>
@@ -170,9 +171,10 @@ const FilterPanel = ({ filters, setFilters, categories, brands, availableBrands,
 );
 
 export const ProductList = ({
-  title = "CATALOG",
-  description = "Explore a darker cinematic product grid with glass filters, quieter motion, and stronger product focus.",
+  title = "All products",
+  description = "Explore the full catalog with simple filters, lighter surfaces, and cleaner product comparison.",
   baseFilters,
+  headerContent = null,
 }) => {
   const brands = useSelector(selectBrands);
   const categories = useSelector(selectCategories);
@@ -183,10 +185,7 @@ export const ProductList = ({
   const [products, setProducts] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [productFetchStatus, setProductFetchStatus] = useState("idle");
-  const stableBaseFilters = useMemo(
-    () => baseFilters || EMPTY_BASE_FILTERS,
-    [baseFilters]
-  );
+  const stableBaseFilters = useMemo(() => baseFilters || EMPTY_BASE_FILTERS, [baseFilters]);
   const normalizedBaseCategory = useMemo(
     () => (Array.isArray(stableBaseFilters?.category) ? stableBaseFilters.category : []),
     [stableBaseFilters]
@@ -203,6 +202,7 @@ export const ProductList = ({
   });
   const filtersKey = JSON.stringify(filters);
   const invalidPriceRange = filters.priceRange[0] > filters.priceRange[1];
+
   const requestPayload = useMemo(
     () => ({
       ...stableBaseFilters,
@@ -233,9 +233,9 @@ export const ProductList = ({
 
   useEffect(() => {
     setFilters((prev) => {
-        const sameCategory =
-          prev.category.length === normalizedBaseCategory.length &&
-          prev.category.every((item) => normalizedBaseCategory.includes(item));
+      const sameCategory =
+        prev.category.length === normalizedBaseCategory.length &&
+        prev.category.every((item) => normalizedBaseCategory.includes(item));
 
       if (sameCategory) {
         return prev;
@@ -246,11 +246,13 @@ export const ProductList = ({
         category: normalizedBaseCategory,
       };
     });
+
     setPage(1);
   }, [baseCategoryKey, normalizedBaseCategory]);
 
   useEffect(() => {
     let isActive = true;
+
     if (invalidPriceRange) {
       setProducts([]);
       setTotalResults(0);
@@ -264,18 +266,14 @@ export const ProductList = ({
 
     fetchProducts(requestPayload)
       .then((response) => {
-        if (!isActive) {
-          return;
-        }
+        if (!isActive) return;
 
         setProducts(Array.isArray(response.data) ? response.data : []);
         setTotalResults(Number(response.totalResults || 0));
         setProductFetchStatus("fulfilled");
       })
       .catch(() => {
-        if (!isActive) {
-          return;
-        }
+        if (!isActive) return;
 
         setProducts([]);
         setProductFetchStatus("rejected");
@@ -293,11 +291,12 @@ export const ProductList = ({
   const totalPages = Math.max(1, Math.ceil(totalResults / ITEMS_PER_PAGE));
 
   const availableBrands = useMemo(() => {
-    if (!products || products.length === 0) {
+    if (!products.length) {
       return [];
     }
 
     const uniqueBrands = new Map();
+
     products.forEach((product) => {
       const brand = product?.brand;
       if (!brand) return;
@@ -323,35 +322,29 @@ export const ProductList = ({
 
   const activeChips = useMemo(() => {
     const chips = [];
+    const categoryFiltersLocked =
+      normalizedBaseCategory.length &&
+      filters.category.length === normalizedBaseCategory.length &&
+      filters.category.every((item) => normalizedBaseCategory.includes(item));
 
-    filters.category.forEach((categoryId) => {
-      const category = categories.find((item) => item._id === categoryId);
-      if (category) {
-        chips.push({ key: `category-${categoryId}`, label: category.name });
-      }
-    });
+    if (!categoryFiltersLocked) {
+      filters.category.forEach((categoryId) => {
+        const category = categories.find((item) => item._id === categoryId);
+        if (category) chips.push({ key: `category-${categoryId}`, label: category.name });
+      });
+    }
 
     filters.brand.forEach((brandId) => {
       const brand = brands.find((item) => item._id === brandId);
-      if (brand) {
-        chips.push({ key: `brand-${brandId}`, label: brand.name });
-      }
+      if (brand) chips.push({ key: `brand-${brandId}`, label: brand.name });
     });
 
-    if (filters.rating) {
-      chips.push({ key: "rating", label: `${filters.rating}+ stars` });
-    }
-
-    if (filters.discount) {
-      chips.push({ key: "discount", label: `${filters.discount}% off` });
-    }
-
-    if (filters.inStock) {
-      chips.push({ key: "stock", label: "In stock" });
-    }
+    if (filters.rating) chips.push({ key: "rating", label: `${filters.rating}+ stars` });
+    if (filters.discount) chips.push({ key: "discount", label: `${filters.discount}% off` });
+    if (filters.inStock) chips.push({ key: "stock", label: "In stock" });
 
     return chips;
-  }, [brands, categories, filters]);
+  }, [brands, categories, filters, normalizedBaseCategory]);
 
   const pageButtons = useMemo(() => {
     const start = Math.max(1, page - 2);
@@ -370,96 +363,81 @@ export const ProductList = ({
     });
 
   return (
-    <PageWrapper className="space-y-0 py-4 md:py-6">
+    <PageWrapper className="py-6 md:py-8">
       <Section className="pt-2">
-        <Card
-          hover={false}
-          className="noise-overlay rounded-[32px] border border-white/8 bg-[linear-gradient(180deg,rgba(14,20,31,0.94),rgba(8,12,20,0.92))] px-5 py-6 sm:px-6 md:rounded-[36px] lg:px-8"
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-textSecondary">Digital showroom</p>
-              <h1 className="text-3xl font-black uppercase tracking-tight text-textPrimary sm:text-4xl">{title}</h1>
-              <p className="max-w-2xl text-base leading-7 text-textSecondary">{description}</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-                {totalResults} products
-              </span>
-              <Button
-                variant="secondary"
-                icon={<FiFilter />}
-                className="rounded-full xl:hidden"
-                onClick={() => setMobileFiltersOpen(true)}
-              >
-                Filters
-              </Button>
-            </div>
+        <div className="flex flex-col gap-5 rounded-[36px] border border-border bg-white px-6 py-6 shadow-card lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-textSecondary">Catalog</p>
+            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-textPrimary sm:text-4xl">{title}</h1>
+            <p className="body-copy max-w-2xl">{description}</p>
           </div>
-        </Card>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-textPrimary">
+              {totalResults} products
+            </span>
+            <Button variant="secondary" icon={<FiFilter />} className="xl:hidden" onClick={() => setMobileFiltersOpen(true)}>
+              Filters
+            </Button>
+          </div>
+        </div>
+
+        {headerContent ? <div className="mt-5 border-t border-border pt-5">{headerContent}</div> : null}
       </Section>
 
       <Section className="pt-4">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start">
-          <div className="hidden w-full max-w-[290px] xl:block">
-            <Card
-              hover={false}
-              className="sticky top-28 rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.92))] p-6"
-            >
+          <div className="hidden w-full max-w-[300px] xl:block">
+            <div className="sticky top-28 rounded-[30px] border border-border bg-white p-6 shadow-card">
               <FilterPanel
                 filters={filters}
                 setFilters={setFilters}
                 categories={categories}
-                brands={brands}
                 availableBrands={availableBrands}
-                lockedCategoryId={normalizedBaseCategory[0]}
+                lockedCategoryIds={normalizedBaseCategory}
               />
-            </Card>
+            </div>
           </div>
 
           <div className="flex-1 space-y-6">
-            <Card
-              hover={false}
-              className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.92))] px-4 py-4 sm:px-5 md:px-6"
-            >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex flex-wrap gap-2">
-                  {activeChips.map((chip) => (
-                    <span key={chip.key} className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-textPrimary shadow-[0_10px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-                      {chip.label}
-                    </span>
-                  ))}
-                  {activeChips.length ? (
+            <div className="flex flex-col gap-4 rounded-[30px] border border-border bg-white px-5 py-5 shadow-card lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap gap-2">
+                {activeChips.length ? (
+                  <>
+                    {activeChips.map((chip) => (
+                      <span key={chip.key} className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-textPrimary">
+                        {chip.label}
+                      </span>
+                    ))}
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="rounded-full px-4 py-2 text-sm font-medium text-textSecondary transition hover:bg-white/[0.05] hover:text-textPrimary"
+                      className="rounded-full px-4 py-2 text-sm font-medium text-textSecondary transition hover:bg-surface hover:text-textPrimary"
                     >
                       Clear all
                     </button>
-                  ) : (
-                    <span className="text-sm text-textSecondary">Use filters to narrow the catalog.</span>
-                  )}
-                </div>
-
-                <div className="w-full sm:w-[240px]">
-                  <Input as="select" value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort products">
-                    {sortOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </Input>
-                </div>
+                  </>
+                ) : (
+                  <span className="text-sm text-textSecondary">Use filters to narrow the catalog.</span>
+                )}
               </div>
-            </Card>
+
+              <div className="w-full sm:w-[240px]">
+                <Input as="select" value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort products">
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Input>
+              </div>
+            </div>
 
             {productFetchStatus === "pending" ? (
               <LoadingState />
             ) : products.length ? (
               <>
-                <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
                   {products.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
@@ -469,7 +447,6 @@ export const ProductList = ({
                   <Button
                     variant="secondary"
                     disabled={page === 1}
-                    className="rounded-full"
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                   >
                     Previous
@@ -480,10 +457,10 @@ export const ProductList = ({
                       type="button"
                       onClick={() => setPage(pageNumber)}
                       className={[
-                        "inline-flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold backdrop-blur-xl transition",
+                        "inline-flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold transition",
                         pageNumber === page
-                          ? "border-accent/40 bg-[linear-gradient(135deg,rgba(200,139,74,0.24),rgba(104,138,255,0.18))] text-white"
-                          : "border-white/10 bg-white/[0.05] text-textPrimary hover:border-accent/25",
+                          ? "border-primary bg-primary text-white"
+                          : "border-border bg-white text-textPrimary hover:border-primary/15",
                       ].join(" ")}
                     >
                       {pageNumber}
@@ -492,7 +469,6 @@ export const ProductList = ({
                   <Button
                     variant="secondary"
                     disabled={page === totalPages}
-                    className="rounded-full"
                     onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                   >
                     Next
@@ -511,44 +487,40 @@ export const ProductList = ({
         </div>
       </Section>
 
-      <Section className="pb-4">
-        <NewsletterBanner />
-      </Section>
-
       <AnimatePresence>
         {mobileFiltersOpen ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] bg-black/30 backdrop-blur-sm xl:hidden"
+            className="fixed inset-0 z-[80] bg-black/20 backdrop-blur-sm xl:hidden"
           >
             <motion.div
-              initial={{ x: 32, opacity: 0 }}
+              initial={{ x: 24, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 32, opacity: 0 }}
-              className="ml-auto h-full w-full max-w-sm border-l border-white/10 bg-[linear-gradient(180deg,rgba(9,13,20,0.98),rgba(14,20,31,0.98))] p-5"
+              exit={{ x: 24, opacity: 0 }}
+              className="ml-auto h-full w-full max-w-sm border-l border-border bg-background p-5 shadow-premium"
             >
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-lg font-semibold text-textPrimary">Filters</p>
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-textPrimary backdrop-blur-xl"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-white text-textPrimary"
                 >
                   <FiX />
                 </button>
               </div>
-              <Card hover={false} className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.96),rgba(9,13,20,0.94))] p-5">
+
+              <div className="rounded-[28px] border border-border bg-white p-5 shadow-card">
                 <FilterPanel
                   filters={filters}
                   setFilters={setFilters}
                   categories={categories}
-                  brands={brands}
                   availableBrands={availableBrands}
-                  lockedCategoryId={normalizedBaseCategory[0]}
+                  lockedCategoryIds={normalizedBaseCategory}
                 />
-              </Card>
+              </div>
             </motion.div>
           </motion.div>
         ) : null}

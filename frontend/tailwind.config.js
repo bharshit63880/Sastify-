@@ -5,34 +5,34 @@ module.exports = {
     extend: {
       colors: {
         primary: "#111111",
-        secondary: "#1A2230",
-        accent: "#C88B4A",
-        background: "#090D14",
-        card: "#0F1623",
-        border: "#202A3A",
-        textPrimary: "#F7F9FC",
-        textSecondary: "#9AA7BA",
-        surface: "#101A2A",
+        secondary: "#EEE7DD",
+        accent: "#A07C53",
+        background: "#F6F2EB",
+        card: "#FFFFFF",
+        border: "#E6DED2",
+        textPrimary: "#111111",
+        textSecondary: "#6E675F",
+        surface: "#FBF8F2",
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
       boxShadow: {
-        premium: "0 35px 100px rgba(0, 0, 0, 0.38)",
-        glow: "0 0 0 1px rgba(200, 139, 74, 0.18), 0 28px 80px rgba(8, 14, 28, 0.5)",
-        card: "0 24px 80px rgba(5, 9, 18, 0.44)",
-        glass: "0 22px 70px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
-        "glow-accent": "0 18px 44px rgba(200, 139, 74, 0.22)",
+        premium: "0 30px 80px rgba(17, 17, 17, 0.08)",
+        glow: "0 0 0 1px rgba(160, 124, 83, 0.08), 0 24px 60px rgba(17, 17, 17, 0.08)",
+        card: "0 14px 40px rgba(17, 17, 17, 0.06)",
+        glass: "0 14px 34px rgba(17, 17, 17, 0.05)",
+        "glow-accent": "0 14px 38px rgba(160, 124, 83, 0.14)",
       },
       backgroundImage: {
         "brand-gradient":
-          "linear-gradient(135deg, rgba(200, 139, 74, 0.98), rgba(116, 82, 38, 0.88))",
+          "linear-gradient(135deg, rgba(160, 124, 83, 1), rgba(193, 166, 132, 0.85))",
         "hero-grid":
-          "radial-gradient(circle at top, rgba(28, 39, 61, 0.55), transparent 34%), radial-gradient(circle at bottom right, rgba(200, 139, 74, 0.14), transparent 28%)",
+          "radial-gradient(circle at top, rgba(255,255,255,0.82), transparent 38%), radial-gradient(circle at bottom right, rgba(160,124,83,0.12), transparent 28%)",
         "glass-gradient":
-          "linear-gradient(135deg, rgba(21,28,41,0.9), rgba(13,18,29,0.62))",
+          "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(251,248,242,0.96))",
         "button-gradient":
-          "linear-gradient(135deg, rgba(200,139,74,1), rgba(105,74,35,0.92))",
+          "linear-gradient(135deg, rgba(17,17,17,1), rgba(45,45,45,0.96))",
       },
       animation: {
         float: "float 8s ease-in-out infinite",

@@ -1,82 +1,20 @@
-import React, { useDeferredValue, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  FiHeart,
-  FiMenu,
-  FiPackage,
-  FiSearch,
-  FiShoppingCart,
-  FiUser,
-  FiX,
-} from "react-icons/fi";
+import { FiChevronDown, FiMenu, FiShoppingCart, FiUser, FiX } from "react-icons/fi";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { selectLoggedInUser, logoutAsync } from "../../auth/AuthSlice";
+import { Container } from "../../../components/ui/Container";
+import { buildCategoryTree, getCategoryHref } from "../../../utils/categoryTree";
+import { CategoryGlyph, getCategoryImage } from "../../../utils/categoryPresentation";
+import { logoutAsync, selectLoggedInUser } from "../../auth/AuthSlice";
 import { selectCartItems } from "../../cart/CartSlice";
 import { selectCategories } from "../../categories/CategoriesSlice";
-import { fetchSearchSuggestions } from "../../search/SearchApi";
-import { selectStorefrontMetrics } from "../../storefront/StorefrontSlice";
-import { selectWishlistItems } from "../../wishlist/WishlistSlice";
-import { RECENT_SEARCH_STORAGE_KEY } from "../../../constants";
 
-const primaryLinks = [
-  { label: "Home", to: "/" },
-  { label: "Shop", to: "/products" },
-  { label: "Deals", to: "/products?isDealOfDay=true" },
-];
+const navItemClass =
+  "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-textSecondary transition hover:bg-white hover:text-textPrimary";
 
-const loadRecentSearches = () => {
-  try {
-    return JSON.parse(window.localStorage.getItem(RECENT_SEARCH_STORAGE_KEY) || "[]");
-  } catch (error) {
-    return [];
-  }
-};
-
-const persistRecentSearch = (query) => {
-  const normalized = query.trim();
-  if (!normalized) return;
-  const unique = [normalized, ...loadRecentSearches().filter((item) => item !== normalized)].slice(0, 5);
-  window.localStorage.setItem(RECENT_SEARCH_STORAGE_KEY, JSON.stringify(unique));
-};
-
-const iconButtonClass =
-  "relative inline-flex h-12 min-w-[48px] items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-textPrimary shadow-[0_14px_34px_rgba(0,0,0,0.24)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:bg-white/[0.08] hover:shadow-[0_18px_40px_rgba(200,139,74,0.18)]";
-
-const StatPill = ({ text }) => (
-  <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-xs font-medium text-textSecondary shadow-[0_10px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-    <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-accent to-primary" />
-    {text}
-  </span>
-);
-
-const ActionButton = ({ to, onClick, icon, label, count }) => {
-  const inner = (
-    <span className={iconButtonClass}>
-      {icon}
-      {label ? <span className="hidden sm:inline">{label}</span> : null}
-      {count ? (
-        <motion.span
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="absolute -right-1 -top-1 inline-flex min-h-[20px] min-w-[20px] items-center justify-center rounded-full bg-button-gradient px-1 text-[10px] font-semibold text-white"
-        >
-          {count}
-        </motion.span>
-      ) : null}
-    </span>
-  );
-
-  if (to) {
-    return <Link to={to}>{inner}</Link>;
-  }
-
-  return (
-    <button type="button" onClick={onClick}>
-      {inner}
-    </button>
-  );
-};
+const actionClass =
+  "relative inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2.5 text-sm font-medium text-textPrimary shadow-[0_10px_24px_rgba(17,17,17,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(17,17,17,0.08)]";
 
 export const Navbar = () => {
   const dispatch = useDispatch();
@@ -84,97 +22,36 @@ export const Navbar = () => {
   const location = useLocation();
   const categories = useSelector(selectCategories);
   const loggedInUser = useSelector(selectLoggedInUser);
-  const wishlistItems = useSelector(selectWishlistItems);
   const cartItems = useSelector(selectCartItems);
-  const storefrontMetrics = useSelector(selectStorefrontMetrics);
 
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState({
-    products: [],
-    categories: [],
-    brands: [],
-    trending: [],
-  });
-  const [searchLoading, setSearchLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
+  const [activeRootId, setActiveRootId] = useState("");
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const currentQuery = searchParams.get("q");
-    setQuery(currentQuery || "");
     setMenuOpen(false);
+    setCategoriesOpen(false);
     setAccountOpen(false);
-    setSearchOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
-    let lastY = window.scrollY;
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      setIsScrolled(currentY > 18);
-      setIsHidden(currentY > 140 && currentY > lastY);
-      lastY = currentY;
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 12);
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const deferredQuery = useDeferredValue(query);
+  const categoryTree = useMemo(() => buildCategoryTree(categories).roots, [categories]);
 
   useEffect(() => {
-    if (!searchOpen) return undefined;
+    if (!activeRootId && categoryTree.length) {
+      setActiveRootId(String(categoryTree[0]._id));
+    }
+  }, [activeRootId, categoryTree]);
 
-    let isActive = true;
-    const trimmedQuery = deferredQuery.trim();
-    const timeoutId = setTimeout(async () => {
-      try {
-        setSearchLoading(true);
-        const response = await fetchSearchSuggestions({
-          query: trimmedQuery,
-          limit: 6,
-        });
-        if (!isActive) return;
-        setSuggestions({
-          products: response.products || [],
-          categories: response.categories || [],
-          brands: response.brands || [],
-          trending: response.trending || [],
-        });
-      } catch (error) {
-        if (!isActive) return;
-        setSuggestions({ products: [], categories: [], brands: [], trending: [] });
-      } finally {
-        if (isActive) setSearchLoading(false);
-      }
-    }, 220);
-
-    return () => {
-      isActive = false;
-      clearTimeout(timeoutId);
-    };
-  }, [deferredQuery, searchOpen]);
-
-  const trustHighlights = useMemo(() => {
-    const safeNumber = (value) => Number(value || 0).toLocaleString("en-IN");
-    return [
-      `${safeNumber(storefrontMetrics.activeProducts)} live products`,
-      `${safeNumber(storefrontMetrics.activeCategories)} categories`,
-      `${safeNumber(storefrontMetrics.publishedReviews)} reviews`,
-    ];
-  }, [storefrontMetrics]);
-
-  const handleSearchSubmit = (value = query) => {
-    const finalQuery = value.trim();
-    if (!finalQuery) return;
-    persistRecentSearch(finalQuery);
-    setSearchOpen(false);
-    navigate(`/search?q=${encodeURIComponent(finalQuery)}`);
-  };
+  const activeRoot = categoryTree.find((item) => String(item._id) === activeRootId) || categoryTree[0];
 
   const handleLogout = async () => {
     setAccountOpen(false);
@@ -182,373 +59,321 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-  const recentSearches = loadRecentSearches();
-  const suggestionProducts = suggestions.products || [];
-  const suggestionCategories = suggestions.categories || [];
-  const suggestionBrands = suggestions.brands || [];
-  const trendingSearches = suggestions.trending || [];
+  const accountLinks = loggedInUser?.isAdmin
+    ? [{ label: "Dashboard", to: "/admin" }]
+    : [
+        { label: "Profile", to: "/account" },
+        { label: "Orders", to: "/orders" },
+      ];
 
   return (
-    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-4 lg:px-6">
-      <motion.div
-        animate={{
-          y: isHidden ? -18 : 0,
-          opacity: isHidden ? 0.92 : 1,
-          paddingTop: isScrolled ? 10 : 14,
-          paddingBottom: isScrolled ? 10 : 14,
-          scale: isScrolled ? 0.985 : 1,
-        }}
-        transition={{ duration: 0.35 }}
-        className="glass-card noise-overlay overflow-hidden rounded-[30px] border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.82),rgba(9,13,20,0.78))] px-3 shadow-[0_24px_70px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:px-5"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 py-2.5 text-xs text-textSecondary">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {trustHighlights.map((item) => (
-              <StatPill key={item} text={item} />
-            ))}
-          </div>
-          <p className="hidden md:block">
-            Average rating {Number(storefrontMetrics.averageRating || 0).toFixed(1)}/5 from{" "}
-            {Number(storefrontMetrics.publishedReviews || 0).toLocaleString("en-IN")} reviews
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 py-4">
-          <button type="button" onClick={() => setMenuOpen(true)} className={`${iconButtonClass} lg:hidden`}>
-            <FiMenu />
-          </button>
-
-          <Link to="/" className="min-w-0 shrink-0">
-            <p className="bg-button-gradient bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-[2rem]">
-              Sastify
-            </p>
-            <p className="hidden text-[10px] uppercase tracking-[0.26em] text-textSecondary sm:block">
-              Future commerce
-            </p>
-          </Link>
-
-          <nav className="hidden items-center gap-2 lg:flex">
-            {primaryLinks.map((item) => (
-              <NavLink key={item.to} to={item.to} className="group relative rounded-full px-5 py-3 text-sm font-medium text-textSecondary transition hover:text-textPrimary">
-                {({ isActive }) => (
-                  <>
-                    <span className={`relative z-[1] transition duration-200 ${isActive ? "text-textPrimary" : ""}`}>{item.label}</span>
-                    <span
-                      className={[
-                        "absolute inset-x-3 bottom-2 h-[2px] origin-center rounded-full bg-gradient-to-r from-accent via-primary to-accent transition duration-300",
-                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
-                      ].join(" ")}
-                    />
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="relative ml-auto hidden max-w-[620px] flex-1 md:block">
-            <motion.div
-              animate={{ scale: searchOpen ? 1.01 : 1 }}
-              className="relative flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.05] px-5 py-3.5 shadow-[0_16px_40px_rgba(0,0,0,0.26)] backdrop-blur-2xl"
+    <header className="sticky top-0 z-50 border-b border-transparent bg-background/85 backdrop-blur-xl">
+      <Container>
+        <div
+          className={[
+            "relative flex items-center justify-between gap-3 transition duration-200",
+            isScrolled ? "py-3" : "py-4",
+          ].join(" ")}
+        >
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-textPrimary shadow-[0_10px_24px_rgba(17,17,17,0.05)] md:hidden"
             >
-              <FiSearch className="text-base text-textSecondary" />
-              <input
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setSearchOpen(true);
-                }}
-                onFocus={() => setSearchOpen(true)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleSearchSubmit();
-                }}
-                className="w-full bg-transparent text-sm text-textPrimary outline-none placeholder:text-textSecondary/80"
-                placeholder="Search for mobiles, fashion, appliances and more"
-              />
-            </motion.div>
-
-            <AnimatePresence>
-              {searchOpen ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 glass-card max-h-[420px] overflow-auto p-4"
-                >
-                  {searchLoading ? (
-                    <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                      Loading search suggestions...
-                    </p>
-                  ) : query.trim() ? (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Products</p>
-                        {suggestionProducts.length ? (
-                          suggestionProducts.map((item) => (
-                            <button
-                              key={item._id}
-                              type="button"
-                              onClick={() => handleSearchSubmit(item.name || item.title)}
-                              className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-                                  <img
-                                    src={item.thumbnail || item.images?.[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=200&q=80"}
-                                    alt={item.name || item.title}
-                                    className="h-full w-full object-cover"
-                                  />
-                                </span>
-                                <div>
-                                  <p className="text-sm font-medium text-textPrimary">{item.name || item.title}</p>
-                                  <p className="text-xs text-textSecondary">
-                                    {item.brand?.name || "Sastify"} · Rs. {item.price}
-                                  </p>
-                                </div>
-                              </div>
-                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
-                            </button>
-                          ))
-                        ) : (
-                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                            No instant matches. Press Enter to view all search results.
-                          </p>
-                        )}
-                      </div>
-
-                      {suggestionCategories.length ? (
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Categories</p>
-                          <div className="flex flex-wrap gap-2">
-                            {suggestionCategories.map((category) => (
-                              <Link
-                                key={category._id}
-                                to={`/category/${category.slug}`}
-                                onClick={() => setSearchOpen(false)}
-                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
-                              >
-                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                                  {category.image ? (
-                                    <img src={category.image} alt={category.name} className="h-full w-full object-cover" />
-                                  ) : (
-                                    <span className="text-[10px] font-semibold">{category.name?.[0]}</span>
-                                  )}
-                                </span>
-                                {category.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {suggestionBrands.length ? (
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Brands</p>
-                          <div className="flex flex-wrap gap-2">
-                            {suggestionBrands.map((brand) => (
-                              <button
-                                key={brand._id}
-                                type="button"
-                                onClick={() => handleSearchSubmit(brand.name)}
-                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
-                              >
-                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                                  {brand.logo ? (
-                                    <img src={brand.logo} alt={brand.name} className="h-full w-full object-contain" />
-                                  ) : (
-                                    <span className="text-[10px] font-semibold">{brand.name?.[0]}</span>
-                                  )}
-                                </span>
-                                {brand.name}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Recent searches</p>
-                        {recentSearches.length ? (
-                          recentSearches.map((item) => (
-                            <button
-                              key={item}
-                              type="button"
-                              onClick={() => handleSearchSubmit(item)}
-                              className="flex w-full items-center justify-between rounded-[18px] border border-transparent px-4 py-3 text-left transition hover:border-white/10 hover:bg-white/[0.05]"
-                            >
-                              <span className="text-sm text-textPrimary">{item}</span>
-                              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-textSecondary">Open</span>
-                            </button>
-                          ))
-                        ) : (
-                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                            Your recent searches will appear here.
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Trending searches</p>
-                        {trendingSearches.length ? (
-                          <div className="flex flex-wrap gap-2">
-                            {trendingSearches.map((item) => (
-                              <button
-                                key={item}
-                                type="button"
-                                onClick={() => handleSearchSubmit(item)}
-                                className="rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
-                              >
-                                {item}
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="rounded-[18px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-textSecondary">
-                            No trending searches yet.
-                          </p>
-                        )}
-                      </div>
-
-                      {suggestionCategories.length ? (
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-textSecondary">Popular categories</p>
-                          <div className="flex flex-wrap gap-2">
-                            {suggestionCategories.map((category) => (
-                              <Link
-                                key={category._id}
-                                to={`/category/${category.slug}`}
-                                onClick={() => setSearchOpen(false)}
-                                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-textPrimary transition hover:border-accent/25 hover:bg-white/[0.08]"
-                              >
-                                <span className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-                                  {category.image ? (
-                                    <img src={category.image} alt={category.name} className="h-full w-full object-cover" />
-                                  ) : (
-                                    <span className="text-[10px] font-semibold">{category.name?.[0]}</span>
-                                  )}
-                                </span>
-                                {category.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            <button type="button" onClick={() => setSearchOpen((prev) => !prev)} className={`${iconButtonClass} md:hidden`}>
-              <FiSearch />
+              <FiMenu />
             </button>
 
-            <ActionButton
-              onClick={() => {
-                if (loggedInUser) {
-                  setAccountOpen((prev) => !prev);
-                } else {
-                  navigate("/login");
+            <Link to="/" className="text-[1.65rem] font-semibold tracking-[-0.05em] text-textPrimary">
+              Sastify
+            </Link>
+          </div>
+
+          <nav className="hidden items-center gap-2 md:flex">
+            <NavLink to="/products" className={navItemClass}>
+              {({ isActive }) => <span className={isActive ? "text-textPrimary" : ""}>Shop</span>}
+            </NavLink>
+
+            <div
+              className="relative"
+              onMouseEnter={() => {
+                setCategoriesOpen(true);
+                setAccountOpen(false);
+                if (!activeRootId && categoryTree.length) {
+                  setActiveRootId(String(categoryTree[0]._id));
                 }
               }}
-              icon={<FiUser />}
-            />
-            {!loggedInUser?.isAdmin ? (
-              <>
-                <ActionButton to={loggedInUser ? "/wishlist" : "/login"} icon={<FiHeart />} count={wishlistItems.length} />
-                <ActionButton to={loggedInUser ? "/orders" : "/login"} icon={<FiPackage />} />
-              </>
-            ) : null}
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
-              <ActionButton to="/cart" icon={<FiShoppingCart />} count={cartItems.length} />
-            </motion.div>
+              onMouseLeave={() => setCategoriesOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoriesOpen((prev) => !prev);
+                  setAccountOpen(false);
+                }}
+                className={navItemClass}
+              >
+                Categories
+                <FiChevronDown className={`transition ${categoriesOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              <AnimatePresence>
+                {categoriesOpen && activeRoot ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute left-1/2 top-[calc(100%+14px)] z-50 w-[min(1040px,82vw)] -translate-x-1/2 overflow-hidden rounded-[30px] border border-border bg-white shadow-premium"
+                  >
+                    <div className="grid grid-cols-[260px_1fr]">
+                      <div className="border-r border-border bg-surface p-4">
+                        <p className="px-3 pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-textSecondary">
+                          Departments
+                        </p>
+                        <div className="space-y-1">
+                          {categoryTree.map((root) => (
+                            <button
+                              key={root._id}
+                              type="button"
+                              onMouseEnter={() => setActiveRootId(String(root._id))}
+                              onFocus={() => setActiveRootId(String(root._id))}
+                              className={[
+                                "flex w-full items-center justify-between rounded-[20px] px-4 py-3 text-left text-sm transition",
+                                String(root._id) === String(activeRoot._id)
+                                  ? "bg-white text-textPrimary shadow-[0_8px_20px_rgba(17,17,17,0.05)]"
+                                  : "text-textSecondary hover:bg-white/80 hover:text-textPrimary",
+                              ].join(" ")}
+                            >
+                              <span className="flex items-center gap-3">
+                                <span
+                                  className={[
+                                    "inline-flex h-10 w-10 items-center justify-center rounded-full border transition",
+                                    String(root._id) === String(activeRoot._id)
+                                      ? "border-border bg-surface text-textPrimary"
+                                      : "border-transparent bg-white text-textSecondary",
+                                  ].join(" ")}
+                                >
+                                  <CategoryGlyph category={root} className="text-base" />
+                                </span>
+                                <span className="font-medium">{root.name}</span>
+                              </span>
+                              <FiChevronDown className="-rotate-90 text-xs" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <div className="mb-6 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+                          <div className="space-y-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-textSecondary">Explore</p>
+                            <h3 className="text-2xl font-semibold tracking-[-0.04em] text-textPrimary">
+                              {activeRoot.name}
+                            </h3>
+                            <p className="max-w-md text-sm leading-6 text-textSecondary">
+                              Browse focused subcategories with cleaner navigation and faster discovery.
+                            </p>
+                            <Link
+                              to={getCategoryHref(activeRoot)}
+                              className="inline-flex rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-textPrimary transition hover:bg-white"
+                            >
+                              Shop all
+                            </Link>
+                          </div>
+
+                          <div className="overflow-hidden rounded-[24px] border border-border bg-surface">
+                            <div className="grid h-full grid-cols-[120px_1fr]">
+                              <img
+                                src={getCategoryImage(activeRoot)}
+                                alt={activeRoot.name}
+                                className="h-full w-full object-cover"
+                              />
+                              <div className="flex flex-col justify-center gap-2 px-4 py-4">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">
+                                  Featured department
+                                </p>
+                                <p className="text-lg font-semibold tracking-tight text-textPrimary">
+                                  {activeRoot.name}
+                                </p>
+                                <p className="text-sm text-textSecondary">
+                                  {activeRoot.children.length} focused categories
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                          {activeRoot.children.length ? (
+                            activeRoot.children.map((child) => (
+                              <div key={child._id} className="rounded-[24px] border border-border bg-surface p-4">
+                                <Link to={getCategoryHref(child)} className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.16em] text-textPrimary">
+                                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-textPrimary shadow-[0_8px_18px_rgba(17,17,17,0.05)]">
+                                    <CategoryGlyph category={child} className="text-sm" />
+                                  </span>
+                                  {child.name}
+                                </Link>
+                                <div className="mt-3 space-y-2">
+                                  {(child.children.length ? child.children : [child]).slice(0, 6).map((leaf) => (
+                                    <Link
+                                      key={leaf._id}
+                                      to={getCategoryHref(leaf)}
+                                      className="flex items-center gap-3 rounded-2xl bg-white px-3 py-3 text-sm text-textSecondary transition hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(17,17,17,0.05)] hover:text-textPrimary"
+                                    >
+                                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-surface text-textPrimary">
+                                        <CategoryGlyph category={leaf} className="text-sm" />
+                                      </span>
+                                      {leaf.name}
+                                    </Link>
+                                  ))}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="space-y-3">
+                              <Link
+                                to={getCategoryHref(activeRoot)}
+                                className="inline-flex text-sm font-semibold uppercase tracking-[0.16em] text-textPrimary"
+                              >
+                                {activeRoot.name}
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Link to="/cart" className={actionClass}>
+              <FiShoppingCart />
+              <span className="hidden sm:inline">Cart</span>
+              {cartItems.length ? (
+                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-white">
+                  {cartItems.length}
+                </span>
+              ) : null}
+            </Link>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!loggedInUser) {
+                    navigate("/login");
+                    return;
+                  }
+
+                  setAccountOpen((prev) => !prev);
+                  setCategoriesOpen(false);
+                }}
+                className={actionClass}
+              >
+                <FiUser />
+                <span className="hidden sm:inline">Profile</span>
+              </button>
+
+              <AnimatePresence>
+                {accountOpen && loggedInUser ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute right-0 top-[calc(100%+10px)] z-50 w-52 rounded-[24px] border border-border bg-white p-3 shadow-premium"
+                  >
+                    <div className="grid gap-1">
+                      {accountLinks.map((item) => (
+                        <Link
+                          key={item.label}
+                          to={item.to}
+                          className="rounded-2xl px-4 py-3 text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="rounded-2xl px-4 py-3 text-left text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-
-        <div className="hidden items-center gap-3 overflow-x-auto pb-4 lg:flex">
-          {categories.slice(0, 10).map((category) => (
-            <Link
-              key={category._id}
-              to={`/category/${category.slug}`}
-              className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-textSecondary shadow-[0_10px_26px_rgba(0,0,0,0.22)] backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:bg-white/[0.07] hover:text-textPrimary"
-            >
-              {category.name}
-            </Link>
-          ))}
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {accountOpen ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.98 }}
-            className="absolute right-5 top-[calc(100%-6px)] z-50 w-[250px] glass-card p-3 sm:right-8 lg:right-12"
-          >
-            {loggedInUser?.isAdmin ? (
-              <>
-                <Link to="/admin" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                  Admin dashboard
-                </Link>
-                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/account" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                  My account
-                </Link>
-                <Link to="/orders" className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                  My orders
-                </Link>
-                <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                  Logout
-                </button>
-              </>
-            )}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      </Container>
 
       <AnimatePresence>
         {menuOpen ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-sm lg:hidden">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm md:hidden">
             <motion.div
-              initial={{ x: -32, opacity: 0 }}
+              initial={{ x: -24, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -32, opacity: 0 }}
-              className="glass-card h-full w-[min(88vw,340px)] rounded-none rounded-r-[30px] border-r border-white/8 bg-[linear-gradient(180deg,rgba(12,18,28,0.96),rgba(8,12,20,0.96))] p-5"
+              exit={{ x: -24, opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="h-full w-[min(88vw,360px)] overflow-y-auto border-r border-border bg-background px-5 py-5 shadow-premium"
             >
-              <div className="mb-8 flex items-start justify-between">
-                <div>
-                  <p className="bg-button-gradient bg-clip-text text-2xl font-black text-transparent">Sastify</p>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-textSecondary">Navigation</p>
-                </div>
-                <button type="button" onClick={() => setMenuOpen(false)} className={iconButtonClass}>
+              <div className="mb-8 flex items-center justify-between">
+                <Link to="/" className="text-2xl font-semibold tracking-[-0.04em] text-textPrimary">
+                  Sastify
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-textPrimary"
+                >
                   <FiX />
                 </button>
               </div>
 
-              <div className="space-y-2">
-                {primaryLinks.map((item) => (
-                  <Link key={item.to} to={item.to} className="block rounded-[18px] px-4 py-3 text-sm text-textPrimary transition hover:bg-white/[0.06]">
-                    {item.label}
-                  </Link>
-                ))}
-                {categories.slice(0, 8).map((category) => (
-                  <Link
-                    key={category._id}
-                    to={`/category/${category.slug}`}
-                    className="block rounded-[18px] px-4 py-3 text-sm text-textSecondary transition hover:bg-white/[0.06] hover:text-textPrimary"
-                  >
-                    {category.name}
-                  </Link>
-                ))}
+              <div className="space-y-3">
+                <Link to="/products" className="block rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white">
+                  Shop
+                </Link>
+                <div className="rounded-[24px] border border-border bg-white p-4">
+                  <p className="px-1 pb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">
+                    Categories
+                  </p>
+                  <div className="space-y-4">
+                    {categoryTree.slice(0, 6).map((root) => (
+                      <div key={root._id} className="space-y-2">
+                        <Link to={getCategoryHref(root)} className="block text-sm font-semibold text-textPrimary">
+                          {root.name}
+                        </Link>
+                        <div className="grid gap-1 pl-3">
+                          {root.children.slice(0, 4).map((child) => (
+                            <Link
+                              key={child._id}
+                              to={getCategoryHref(child)}
+                              className="rounded-xl px-3 py-2 text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <Link to="/cart" className="block rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white">
+                  Cart
+                </Link>
+                <Link
+                  to={loggedInUser ? (loggedInUser.isAdmin ? "/admin" : "/account") : "/login"}
+                  className="block rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white"
+                >
+                  Profile
+                </Link>
               </div>
             </motion.div>
           </motion.div>

@@ -10,7 +10,7 @@ export const Section = ({ className = "", children }) => {
       initial="hidden"
       whileInView="visible"
       viewport={viewportOnce}
-      className={cn("relative py-14 md:py-16", className)}
+      className={cn("relative py-10 md:py-12", className)}
     >
       {children}
     </motion.section>
@@ -25,7 +25,7 @@ export const SectionIntro = ({ eyebrow, title, description, action }) => {
     >
       <div className="max-w-3xl space-y-3">
         {eyebrow ? (
-          <span className="inline-flex rounded-full border border-white/60 bg-white/70 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-textPrimary shadow-[0_10px_30px_rgba(17,17,17,0.06)]">
+          <span className="inline-flex rounded-full border border-border bg-white px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-textSecondary shadow-[0_10px_24px_rgba(17,17,17,0.04)]">
             {eyebrow}
           </span>
         ) : null}

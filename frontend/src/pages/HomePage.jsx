@@ -1,23 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { FiArrowRight, FiStar, FiZap } from "react-icons/fi";
+import { FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { NewsletterBanner } from "../components/NewsletterBanner";
 import { LoadingState } from "../components/LoadingState";
 import { SectionHeader } from "../components/SectionHeader";
 import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
 import { PageWrapper } from "../components/ui/PageWrapper";
 import { Section } from "../components/ui/Section";
-import { fetchStorefrontHome } from "../features/storefront/StorefrontApi";
-import { selectStorefrontMetrics, selectStorefrontTestimonials } from "../features/storefront/StorefrontSlice";
 import { ProductCard } from "../features/products/components/ProductCard";
+import { fetchStorefrontHome } from "../features/storefront/StorefrontApi";
+import { buildCategoryTree, getCategoryHref } from "../utils/categoryTree";
+import { CategoryGlyph } from "../utils/categoryPresentation";
 
 const emptyHome = {
   banners: [],
   categories: [],
-  brands: [],
   sections: {
     trending: [],
     bestSellers: [],
@@ -26,21 +23,48 @@ const emptyHome = {
   },
 };
 
+const getShelfProducts = (primary, fallback = []) => (primary.length ? primary : fallback);
+
+const ProductShelf = ({ eyebrow, title, products, loading }) => (
+  <Section>
+    <div className="rounded-[34px] border border-border bg-white p-5 shadow-card sm:p-6">
+      <SectionHeader
+        eyebrow={eyebrow}
+        title={title}
+        action={
+          <Button to="/products" variant="ghost" icon={<FiArrowRight />}>
+            View all
+          </Button>
+        }
+      />
+
+      {loading ? (
+        <LoadingState />
+      ) : products.length ? (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {products.slice(0, 8).map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  </Section>
+);
+
 export const HomePage = () => {
-  const metrics = useSelector(selectStorefrontMetrics);
-  const testimonials = useSelector(selectStorefrontTestimonials);
   const [homeData, setHomeData] = useState(emptyHome);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isActive = true;
+
     fetchStorefrontHome()
       .then((data) => {
         if (!isActive) return;
+
         setHomeData({
           banners: data.banners || [],
           categories: data.categories || [],
-          brands: data.brands || [],
           sections: {
             trending: data.sections?.trending || [],
             bestSellers: data.sections?.bestSellers || [],
@@ -62,244 +86,83 @@ export const HomePage = () => {
     };
   }, []);
 
-  const heroStats = useMemo(
-    () => [
-      { label: Number(metrics.activeProducts || 0).toLocaleString("en-IN"), value: "Premium products" },
-      { label: Number(metrics.totalOrders || 0).toLocaleString("en-IN"), value: "Verified orders" },
-      { label: `${Number(metrics.averageRating || 0).toFixed(1)}/5`, value: "Average satisfaction" },
-    ],
-    [metrics.activeProducts, metrics.averageRating, metrics.totalOrders]
-  );
+  const { roots: categoryRoots } = useMemo(() => buildCategoryTree(homeData.categories), [homeData.categories]);
+  const rootCategories = categoryRoots.slice(0, 6);
 
   const primaryBanner = homeData.banners[0];
-  const heroTitle = primaryBanner?.title || "Discover the new marketplace experience.";
-  const heroSubtitle =
-    primaryBanner?.subtitle ||
-    "Every section is now powered by real marketplace data: banners, categories, and live product collections.";
+  const heroLabel = "Limited-time offer";
+  const heroTitle =
+    primaryBanner?.title && primaryBanner.title.length <= 46
+      ? primaryBanner.title
+      : "Up to 40% off premium essentials";
+  const heroImage =
+    primaryBanner?.image ||
+    "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1600&q=80";
+
+  const trendingProducts = getShelfProducts(homeData.sections.trending, homeData.sections.newArrivals);
+  const dealProducts = getShelfProducts(homeData.sections.dealsOfDay, homeData.sections.bestSellers);
+  const bestSellerProducts = getShelfProducts(homeData.sections.bestSellers, homeData.sections.trending);
 
   return (
-    <PageWrapper className="space-y-0 py-6 md:py-8">
-      <Section className="pt-4">
-        <Card
-          hover={false}
-          className="noise-overlay overflow-hidden rounded-[36px] border border-white/8 bg-[linear-gradient(180deg,rgba(13,19,29,0.96),rgba(8,11,18,0.94))] p-4 sm:p-6 lg:p-8"
-        >
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="flex flex-col justify-between gap-8">
-              <div className="space-y-6">
-              
-                <div className="space-y-4">
-                  <h1 className="hero-title max-w-3xl bg-[linear-gradient(135deg,#ffffff_10%,#d7e2ff_46%,#c88b4a_98%)] bg-clip-text text-transparent">
-                    {heroTitle}
-                  </h1>
-                  <p className="max-w-xl text-base leading-8 text-textSecondary">{heroSubtitle}</p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button to={primaryBanner?.ctaLink || "/products"} icon={<FiArrowRight />} className="rounded-full px-7">
-                    {primaryBanner?.ctaText || "Shop the marketplace"}
-                  </Button>
-                  <Button to="/products?sort=newest" variant="secondary" className="rounded-full px-7">
-                    Explore new arrivals
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-4 border-t border-white/8 pt-6 sm:grid-cols-3">
-                {heroStats.map((stat) => (
-                  <div key={stat.value} className="rounded-[24px] border border-white/8 bg-white/[0.05] p-4 shadow-[0_18px_38px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-                    <p className="text-3xl font-black tracking-tight text-textPrimary">{stat.label}</p>
-                    <p className="mt-2 text-sm text-textSecondary">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
+    <PageWrapper className="py-6 md:py-8">
+      <Section className="pt-2">
+        <div className="overflow-hidden rounded-[36px] border border-border bg-white shadow-card">
+          <div className="grid min-h-[320px] gap-0 lg:grid-cols-[0.88fr_1.12fr]">
+            <div className="flex flex-col justify-center px-6 py-8 sm:px-8 lg:px-10">
+              <span className="inline-flex w-fit rounded-full border border-border bg-surface px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textSecondary">
+                {heroLabel}
+              </span>
+              <h1 className="mt-5 max-w-md text-4xl font-semibold tracking-[-0.05em] text-textPrimary sm:text-5xl">
+                {heroTitle}
+              </h1>
+              <Button to="/products" icon={<FiArrowRight />} className="mt-7 w-fit">
+                Shop now
+              </Button>
             </div>
 
-            <div className="grid min-h-[420px] gap-4 md:grid-cols-[1fr_0.78fr]">
-              <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
-                <img
-                  src={primaryBanner?.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80"}
-                  alt={primaryBanner?.title || "Marketplace hero"}
-                  className="h-full w-full object-cover transition duration-700 hover:scale-105"
-                />
-              </motion.div>
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-1">
-                <motion.div whileHover={{ y: -8 }} className="overflow-hidden rounded-[30px] border border-white/8 bg-white/[0.04] shadow-[0_24px_56px_rgba(0,0,0,0.32)]">
-                  <img
-                    src={homeData.banners[1]?.image || primaryBanner?.image || "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"}
-                    alt={homeData.banners[1]?.title || "Marketplace highlight"}
-                    className="h-full w-full object-cover transition duration-700 hover:scale-105"
-                  />
+            <motion.div
+              initial={{ opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              className="relative min-h-[240px] lg:min-h-full"
+            >
+              <img src={heroImage} alt={heroTitle} className="h-full w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/10" />
+            </motion.div>
+          </div>
+        </div>
+      </Section>
+
+      {rootCategories.length ? (
+        <Section className="pt-3">
+          <div className="rounded-[32px] border border-border bg-white p-4 shadow-card sm:p-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {rootCategories.map((category, index) => (
+                <motion.div
+                  key={category._id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.04, ease: "easeOut" }}
+                >
+                  <Link
+                    to={getCategoryHref(category)}
+                    className="group flex h-full flex-col items-center justify-center gap-3 rounded-[24px] border border-border bg-surface px-4 py-5 text-center transition duration-200 hover:scale-[1.03] hover:bg-white hover:shadow-card"
+                  >
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-textPrimary shadow-[0_10px_24px_rgba(17,17,17,0.06)] transition group-hover:bg-primary group-hover:text-white">
+                      <CategoryGlyph category={category} className="text-lg" />
+                    </span>
+                    <span className="text-sm font-semibold text-textPrimary">{category.name}</span>
+                  </Link>
                 </motion.div>
-                <div className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.94))] p-6 shadow-[0_24px_56px_rgba(0,0,0,0.3)]">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
-                    <FiZap />
-                    Live collections
-                  </span>
-                 
-                </div>
-              </div>
+              ))}
             </div>
           </div>
-        </Card>
-      </Section>
-
-      <Section className="py-8">
-        <div className="glass-card overflow-hidden rounded-[34px] border border-white/8 px-5 py-5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-textSecondary">Top brands</p>
-              <p className="text-lg font-semibold text-textPrimary">Trusted marketplace partners</p>
-            </div>
-            <Button to="/products" variant="ghost" className="rounded-full px-4 text-sm">
-              View all
-            </Button>
-          </div>
-          <div className="mt-5 flex gap-3 overflow-x-auto pb-2">
-            {homeData.brands.slice(0, 12).map((brand) => (
-              <div
-                key={brand._id}
-                className="flex min-w-[160px] items-center justify-center rounded-full border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-textPrimary shadow-[0_10px_28px_rgba(0,0,0,0.24)] backdrop-blur-xl"
-              >
-                {brand.logo ? (
-                  <img src={brand.logo} alt={brand.name} className="h-6 w-auto object-contain" />
-                ) : (
-                  brand.name
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      <Section>
-        <SectionHeader
-          eyebrow="Shop by category"
-          title="CATEGORIES"
-          description="Browse marketplace categories curated from your CMS-driven catalog."
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {homeData.categories.map((category) => (
-            <Link key={category._id} to={`/category/${category.slug}`} className="group relative overflow-hidden rounded-[26px] border border-white/8 bg-white/[0.04] shadow-[0_18px_44px_rgba(0,0,0,0.28)]">
-              <img
-                src={category.image || "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80"}
-                alt={category.name}
-                className="h-48 w-full object-cover transition duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-              <div className="absolute inset-x-5 bottom-5">
-                <p className="text-xl font-semibold text-white">{category.name}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Section>
-
-      {loading ? (
-        <Section className="pt-6">
-          <LoadingState />
         </Section>
-      ) : (
-        <>
-          <Section className="pt-4">
-            <SectionHeader
-              eyebrow="Trending now"
-              title="TRENDING PRODUCTS"
-              description="Products flagged as trending by your catalog team."
-              action={
-                <Button to="/products?trending=true" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
-                  View all
-                </Button>
-              }
-            />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {homeData.sections.trending.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </Section>
+      ) : null}
 
-          <Section className="pt-4">
-            <SectionHeader
-              eyebrow="Bestsellers"
-              title="BEST SELLERS"
-              description="High-performing products sorted by sales activity."
-              action={
-                <Button to="/products?sort=sales" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
-                  View all
-                </Button>
-              }
-            />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {homeData.sections.bestSellers.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </Section>
-
-          <Section className="pt-4">
-            <SectionHeader
-              eyebrow="New drops"
-              title="NEW ARRIVALS"
-              description="Latest products added to the marketplace catalog."
-              action={
-                <Button to="/products?sort=newest" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
-                  View all
-                </Button>
-              }
-            />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {homeData.sections.newArrivals.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </Section>
-
-          <Section className="pt-4">
-            <SectionHeader
-              eyebrow="Deals"
-              title="DEALS OF THE DAY"
-              description="Limited-time offers flagged by your admin team."
-              action={
-                <Button to="/products?isDealOfDay=true" variant="ghost" icon={<FiArrowRight />} className="rounded-full">
-                  View all
-                </Button>
-              }
-            />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {homeData.sections.dealsOfDay.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </Section>
-        </>
-      )}
-
-      <Section>
-        <SectionHeader
-          eyebrow="Customer signal"
-          title="OUR HAPPY CUSTOMERS"
-          description="Real reviews pulled dynamically from published customer ratings."
-        />
-        <div className="grid gap-5 lg:grid-cols-3">
-          {(testimonials.length
-            ? testimonials.slice(0, 3)
-            : [{ _id: "fallback-1", customerName: "Verified Buyer", comment: "Smooth checkout, clean layout, and much easier product browsing.", rating: 5 }]).map((item) => (
-            <Card key={item._id} className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,22,35,0.94),rgba(9,13,20,0.94))] p-6">
-              <div className="flex items-center gap-1 text-[#f5b301]">
-                {Array.from({ length: 5 }, (_, index) => (
-                  <FiStar key={`${item._id}-${index}`} className={index < Number(item.rating || 5) ? "fill-current" : ""} />
-                ))}
-              </div>
-              <p className="mt-5 text-base leading-8 text-textSecondary">"{item.comment}"</p>
-              <p className="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-textPrimary">{item.customerName}</p>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      <Section className="pb-4">
-        <NewsletterBanner />
-      </Section>
+      <ProductShelf eyebrow="Trending" title="Trending" products={trendingProducts} loading={loading} />
+      <ProductShelf eyebrow="Top deals" title="Top Deals" products={dealProducts} loading={loading} />
+      <ProductShelf eyebrow="Best sellers" title="Best Sellers" products={bestSellerProducts} loading={loading} />
     </PageWrapper>
   );
 };

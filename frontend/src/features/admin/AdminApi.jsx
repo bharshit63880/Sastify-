@@ -25,8 +25,18 @@ export const updateCategory = async (id, payload) => {
   return res.data;
 };
 
+export const deleteCategory = async (id) => {
+  const res = await axiosi.delete(`/categories/${id}`);
+  return res.data;
+};
+
 export const createBrand = async (payload) => {
   const res = await axiosi.post("/brands", payload);
+  return res.data;
+};
+
+export const deleteBrand = async (id) => {
+  const res = await axiosi.delete(`/brands/${id}`);
   return res.data;
 };
 
