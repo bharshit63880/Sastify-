@@ -25,6 +25,38 @@ const emptyHome = {
 
 const getShelfProducts = (primary, fallback = []) => (primary.length ? primary : fallback);
 
+const getShowcaseCategories = (roots = []) => {
+  const picked = [];
+
+  const pushUnique = (category) => {
+    if (!category || picked.some((item) => String(item._id) === String(category._id))) {
+      return;
+    }
+
+    picked.push(category);
+  };
+
+  roots.forEach((root) => pushUnique(root));
+
+  roots.forEach((root) => {
+    if (!root.children.length) {
+      pushUnique(root);
+      return;
+    }
+
+    root.children.forEach((child) => {
+      if (child.children.length) {
+        child.children.slice(0, 2).forEach((leaf) => pushUnique(leaf));
+        return;
+      }
+
+      pushUnique(child);
+    });
+  });
+
+  return picked.slice(0, 10);
+};
+
 const ProductShelf = ({ eyebrow, title, products, loading }) => (
   <Section>
     <div className="rounded-[34px] border border-border bg-white p-5 shadow-card sm:p-6">
@@ -87,7 +119,7 @@ export const HomePage = () => {
   }, []);
 
   const { roots: categoryRoots } = useMemo(() => buildCategoryTree(homeData.categories), [homeData.categories]);
-  const rootCategories = categoryRoots.slice(0, 6);
+  const showcaseCategories = useMemo(() => getShowcaseCategories(categoryRoots), [categoryRoots]);
 
   const primaryBanner = homeData.banners[0];
   const heroLabel = "Limited-time offer";
@@ -133,13 +165,35 @@ export const HomePage = () => {
         </div>
       </Section>
 
-      {rootCategories.length ? (
+      {showcaseCategories.length ? (
         <Section className="pt-3">
           <div className="rounded-[32px] border border-border bg-white p-4 shadow-card sm:p-5">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {rootCategories.map((category, index) => (
+            <div className="flex gap-3 overflow-x-auto pb-1 sm:hidden">
+              {showcaseCategories.map((category, index) => (
                 <motion.div
                   key={category._id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.04, ease: "easeOut" }}
+                  className="min-w-[152px] shrink-0"
+                >
+                  <Link
+                    to={getCategoryHref(category)}
+                    className="group flex h-full flex-col items-center justify-center gap-3 rounded-[24px] border border-border bg-surface px-4 py-5 text-center transition duration-200 hover:scale-[1.03] hover:bg-white hover:shadow-card"
+                  >
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-textPrimary shadow-[0_10px_24px_rgba(17,17,17,0.06)] transition group-hover:bg-primary group-hover:text-white">
+                      <CategoryGlyph category={category} className="text-lg" />
+                    </span>
+                    <span className="text-sm font-semibold text-textPrimary">{category.name}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-5">
+              {showcaseCategories.map((category, index) => (
+                <motion.div
+                  key={`${category._id}-desktop`}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, delay: index * 0.04, ease: "easeOut" }}

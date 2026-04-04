@@ -8,7 +8,7 @@ import { buildCategoryTree, getCategoryHref } from "../../../utils/categoryTree"
 import { CategoryGlyph, getCategoryImage } from "../../../utils/categoryPresentation";
 import { logoutAsync, selectLoggedInUser } from "../../auth/AuthSlice";
 import { selectCartItems } from "../../cart/CartSlice";
-import { selectCategories } from "../../categories/CategoriesSlice";
+import { fetchAllCategoriesAsync, selectCategories, selectCategoryStatus } from "../../categories/CategoriesSlice";
 
 const navItemClass =
   "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-textSecondary transition hover:bg-white hover:text-textPrimary";
@@ -21,6 +21,7 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const categories = useSelector(selectCategories);
+  const categoryStatus = useSelector(selectCategoryStatus);
   const loggedInUser = useSelector(selectLoggedInUser);
   const cartItems = useSelector(selectCartItems);
 
@@ -29,11 +30,13 @@ export const Navbar = () => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeRootId, setActiveRootId] = useState("");
+  const [mobileExpandedRootId, setMobileExpandedRootId] = useState("");
 
   useEffect(() => {
     setMenuOpen(false);
     setCategoriesOpen(false);
     setAccountOpen(false);
+    setMobileExpandedRootId("");
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -43,6 +46,12 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!categories.length && categoryStatus === "idle") {
+      dispatch(fetchAllCategoriesAsync());
+    }
+  }, [categories.length, categoryStatus, dispatch]);
+
   const categoryTree = useMemo(() => buildCategoryTree(categories).roots, [categories]);
 
   useEffect(() => {
@@ -50,6 +59,12 @@ export const Navbar = () => {
       setActiveRootId(String(categoryTree[0]._id));
     }
   }, [activeRootId, categoryTree]);
+
+  useEffect(() => {
+    if (!mobileExpandedRootId && categoryTree.length) {
+      setMobileExpandedRootId(String(categoryTree[0]._id));
+    }
+  }, [categoryTree, mobileExpandedRootId]);
 
   const activeRoot = categoryTree.find((item) => String(item._id) === activeRootId) || categoryTree[0];
 
@@ -344,26 +359,93 @@ export const Navbar = () => {
                   <p className="px-1 pb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-textSecondary">
                     Categories
                   </p>
-                  <div className="space-y-4">
-                    {categoryTree.slice(0, 6).map((root) => (
-                      <div key={root._id} className="space-y-2">
-                        <Link to={getCategoryHref(root)} className="block text-sm font-semibold text-textPrimary">
-                          {root.name}
-                        </Link>
-                        <div className="grid gap-1 pl-3">
-                          {root.children.slice(0, 4).map((child) => (
-                            <Link
-                              key={child._id}
-                              to={getCategoryHref(child)}
-                              className="rounded-xl px-3 py-2 text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                  {categoryTree.length ? (
+                    <div className="space-y-3">
+                      {categoryTree.map((root) => {
+                        const isExpanded = String(root._id) === mobileExpandedRootId;
+
+                        return (
+                          <div key={root._id} className="overflow-hidden rounded-[22px] border border-border bg-surface">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setMobileExpandedRootId((prev) => (prev === String(root._id) ? "" : String(root._id)))
+                              }
+                              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
                             >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                              <span className="flex items-center gap-3">
+                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-textPrimary shadow-[0_8px_18px_rgba(17,17,17,0.05)]">
+                                  <CategoryGlyph category={root} className="text-base" />
+                                </span>
+                                <span className="text-sm font-semibold text-textPrimary">{root.name}</span>
+                              </span>
+                              <FiChevronDown className={`text-textSecondary transition ${isExpanded ? "rotate-180" : ""}`} />
+                            </button>
+
+                            <AnimatePresence initial={false}>
+                              {isExpanded ? (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.18, ease: "easeOut" }}
+                                  className="overflow-hidden border-t border-border bg-white"
+                                >
+                                  <div className="space-y-3 p-4">
+                                    <Link
+                                      to={getCategoryHref(root)}
+                                      className="inline-flex rounded-full border border-border bg-surface px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-textPrimary"
+                                    >
+                                      Shop all {root.name}
+                                    </Link>
+
+                                    <div className="space-y-3">
+                                      {root.children.length ? (
+                                        root.children.map((child) => (
+                                          <div key={child._id} className="space-y-2">
+                                            <Link
+                                              to={getCategoryHref(child)}
+                                              className="block text-sm font-semibold text-textPrimary"
+                                            >
+                                              {child.name}
+                                            </Link>
+                                            {child.children.length ? (
+                                              <div className="grid gap-1 pl-3">
+                                                {child.children.slice(0, 6).map((leaf) => (
+                                                  <Link
+                                                    key={leaf._id}
+                                                    to={getCategoryHref(leaf)}
+                                                    className="rounded-xl px-3 py-2 text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                                                  >
+                                                    {leaf.name}
+                                                  </Link>
+                                                ))}
+                                              </div>
+                                            ) : null}
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <Link
+                                          to={getCategoryHref(root)}
+                                          className="block rounded-xl px-3 py-2 text-sm text-textSecondary transition hover:bg-surface hover:text-textPrimary"
+                                        >
+                                          {root.name}
+                                        </Link>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ) : null}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="px-1 text-sm text-textSecondary">
+                      {categoryStatus === "rejected" ? "Categories unavailable right now." : "Loading categories..."}
+                    </p>
+                  )}
                 </div>
                 <Link to="/cart" className="block rounded-2xl px-4 py-3 text-sm text-textPrimary transition hover:bg-white">
                   Cart
