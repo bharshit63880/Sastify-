@@ -21,6 +21,14 @@ const clearStoredAuthToken = () => {
     window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
 }
 
+const getStoredAuthToken = () => {
+    if (typeof window === 'undefined') {
+        return ''
+    }
+
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || ''
+}
+
 export const signup=async(cred)=>{
     try {
         const res=await axiosi.post("auth/signup",cred)
