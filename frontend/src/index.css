@@ -84,6 +84,15 @@
 }
 
 @layer components {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .glass-card {
     @apply rounded-[28px] border border-border bg-white/90 shadow-glass backdrop-blur-xl;
   }

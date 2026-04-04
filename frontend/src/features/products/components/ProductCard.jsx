@@ -36,13 +36,13 @@ export const ProductCard = ({ product }) => {
       layout
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, scale: 1.03 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
       className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-border bg-white shadow-card"
     >
       <div className="relative overflow-hidden bg-surface">
         <Link to={`/products/${product.slug || product._id}`} className="block">
-          <div className="aspect-[4/4.7] overflow-hidden">
+          <div className="aspect-[4/4.35] overflow-hidden">
             <ProductVisual
               product={product}
               alt={productLabel}
@@ -65,10 +65,10 @@ export const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+      <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">
         <Link
           to={`/products/${product.slug || product._id}`}
-          className="line-clamp-1 text-base font-semibold tracking-tight text-textPrimary"
+          className="line-clamp-1 text-[15px] font-semibold tracking-tight text-textPrimary"
         >
           {productLabel}
         </Link>
