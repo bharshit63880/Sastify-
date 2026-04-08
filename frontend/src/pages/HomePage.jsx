@@ -151,9 +151,7 @@ export const HomePage = () => {
         <div className="overflow-hidden rounded-[36px] border border-border bg-white shadow-card">
           <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="flex flex-col justify-center px-6 py-7 sm:px-8 lg:px-10 lg:py-9">
-              <span className="inline-flex w-fit rounded-full border border-border bg-surface px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-textSecondary">
-                {heroLabel}
-              </span>
+           
               <h1 className="mt-5 max-w-md text-4xl font-semibold tracking-[-0.06em] text-textPrimary sm:text-[3.3rem]">
                 {heroTitle}
               </h1>
