@@ -128,7 +128,7 @@ export const HomePage = () => {
   const showcaseCategories = useMemo(() => getShowcaseCategories(categoryRoots), [categoryRoots]);
 
   const primaryBanner = homeData.banners[0];
-  const heroLabel = "Fresh marketplace edit";
+  
   const heroTitle =
     primaryBanner?.title && primaryBanner.title.length <= 44
       ? primaryBanner.title
