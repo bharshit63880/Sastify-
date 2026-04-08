@@ -126,7 +126,7 @@ export const HomePage = () => {
 
   const { roots: categoryRoots } = useMemo(() => buildCategoryTree(homeData.categories), [homeData.categories]);
   const showcaseCategories = useMemo(() => getShowcaseCategories(categoryRoots), [categoryRoots]);
-
+  const heroLabel = "Welcome to Sastify";
   const primaryBanner = homeData.banners[0];
   
   const heroTitle =
